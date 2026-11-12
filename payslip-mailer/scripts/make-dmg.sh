@@ -9,6 +9,9 @@
 # hdiutil 是纯命令行的，同样条件下必然成功；代价是 dmg 里没有美化布局。
 #
 # 无论哪种方式产出的 dmg，都要在干净 macOS 上验证双击可安装、Gatekeeper 行为符合预期。
+#
+# dmg 里**必须有一份安装说明**（TC-600 / ch.10「随包附 SHA-256 校验值与安装说明」）：
+# 说明单独发一份，到用户手上就只剩一个 dmg，等于没有说明。所以它跟着包走。
 
 set -euo pipefail
 
@@ -16,6 +19,11 @@ APP_PATH="${1:?用法: bash scripts/make-dmg.sh <path/to/薪邮.app> [输出目�
 OUT_DIR="${2:-./dist}"
 VOL_NAME="薪邮 Payslip Mailer"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PATH/Contents/Info.plist" 2>/dev/null || echo "0.0.0")"
+
+# 仓库根 = 脚本位置的上上级（payslip-mailer/scripts → 工资条群发 app）。
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+INSTALL_DOC="$REPO_ROOT/docs/安装说明.md"
 
 mkdir -p "$OUT_DIR"
 DMG_PATH="$OUT_DIR/薪邮-$VERSION.dmg"
@@ -25,11 +33,19 @@ if [ ! -e "$APP_PATH" ]; then
   exit 1
 fi
 
+if [ ! -f "$INSTALL_DOC" ]; then
+  echo "✗ 找不到安装说明：$INSTALL_DOC" >&2
+  echo "  本项目的口径是「说明随包走」（TC-600 / 设计文档 ch.10），" >&2
+  echo "  不允许打一个没有说明的包。" >&2
+  exit 1
+fi
+
 # 纯 hdiutil：拖 Applications 的引导靠一个符号链接实现，没有图标定位。
 hdiutil_dmg() {
   local staging
   staging="$(mktemp -d)"
   cp -R "$APP_PATH" "$staging/"
+  cp "$INSTALL_DOC" "$staging/安装说明.md"
   ln -s /Applications "$staging/Applications"
   hdiutil create -volname "$VOL_NAME" -srcfolder "$staging" -ov -format UDZO "$DMG_PATH" >/dev/null
   rm -rf "$staging"
@@ -39,11 +55,13 @@ if command -v create-dmg >/dev/null 2>&1; then
   echo "▸ 使用 create-dmg 生成定制 dmg"
   rm -f "$DMG_PATH"
   # 失败不致命：create-dmg 依赖 Finder，在无 GUI 会话下会超时，此时退回 hdiutil。
+  # 安装说明作为窗口里的一个图标放进 dmg（--icon 可收任意文件）。
   if ! create-dmg \
     --volname "$VOL_NAME" \
-    --window-size 660 400 \
+    --window-size 660 480 \
     --icon-size 96 \
     --icon "薪邮.app" 180 170 \
+    --icon "$INSTALL_DOC" 180 370 \
     --app-drop-link 480 170 \
     --no-internet-enable \
     "$DMG_PATH" \

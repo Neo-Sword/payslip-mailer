@@ -16,6 +16,7 @@ pub mod members;
 pub mod password;
 pub mod periods;
 pub mod records;
+pub mod reinit;
 pub mod sendlog;
 pub mod sheet_schema;
 pub mod templates;

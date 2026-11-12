@@ -140,7 +140,7 @@ export function ExportPanel({ periodId }: { periodId: number | null }) {
             )}
 
             <p className={s.note}>
-              导出的表头是**那个月的列**：草稿用当前的工资条项目配置，
+              导出的表头是<b>那个月的列</b>：草稿用当前的工资条项目配置，
               进入「待发送」之后就冻结了 —— 后来改配置不影响这个月。
             </p>
 

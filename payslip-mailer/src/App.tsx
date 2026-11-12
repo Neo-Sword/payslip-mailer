@@ -7,6 +7,7 @@ import {
   Card,
   Chip,
   Column,
+  ConfirmDialog,
   Empty,
   Progress,
   Stat,
@@ -33,8 +34,10 @@ import { FieldConfig } from "./screens/FieldConfig";
 import { MemberConfig } from "./screens/MemberConfig";
 import { TemplateEditor } from "./screens/TemplateEditor";
 import { PeriodPanel } from "./screens/PeriodPanel";
+import { ExportScreen } from "./screens/ExportScreen";
 import { ImportWizard } from "./screens/ImportWizard";
 import { VerifyPanel } from "./screens/VerifyPanel";
+import { QueuePanel } from "./screens/QueuePanel";
 import { HistoryPanel } from "./screens/HistoryPanel";
 import { SetupWizard } from "./screens/SetupWizard";
 import "./styles/tokens.css";
@@ -74,6 +77,10 @@ export default function App() {
   });
   const [fatal, setFatal] = useState<string | null>(null);
   const [reinit, setReinit] = useState(false);
+  /** 「重新初始化」的确认框与执行状态 */
+  const [reinitOpen, setReinitOpen] = useState(false);
+  const [reinitBusy, setReinitBusy] = useState(false);
+  const [reinitError, setReinitError] = useState<string | null>(null);
   /** 恢复对话框由 App 持有：锁屏（忘了口令）与工作台（设置页）两处都要用它 */
   const [restoreOpen, setRestoreOpen] = useState(false);
 
@@ -117,8 +124,32 @@ export default function App() {
       });
   }, [refresh]);
 
-  /* 锁定事件：Rust 侧空闲锁定 / 唤醒锁定 / ⌘L 都会发这一条 */
-  useEffect(() => {
+  /**
+   * 重新初始化：把**读不出来**的旧库移到一边（不删），然后回首启向导。
+   *
+   * 为什么要有这一步：错误文案写着「请先从备份恢复或重新完成初始化」，
+   * 而这两条路原本都没有按钮 —— 使用者被卡在「没能读到本机状态」那一屏，
+   * 唯一能按的「重试」永远不会成功（TC-600 真机验收撞到）。
+   *
+   * 旧库是**改名**移走的（`data.db.bak-<时间戳>`），一个字节都没丢；
+   * 钥匙串条目不动（下一次建档会覆盖写它）。
+   */
+  const startReinitialize = useCallback(async () => {
+    setReinitBusy(true);
+    setReinitError(null);
+    try {
+      await api.reinitializeLocalState();
+      setReinitOpen(false);
+      setReinit(true);
+      setView("setup");
+    } catch (raw) {
+      setReinitError((raw as BackendError).message || "移动旧数据失败，请重试。");
+    } finally {
+      setReinitBusy(false);
+    }
+  }, []);
+
+  /* 锁定事件：Rust 侧空闲锁定 / 唤醒锁定 / ⌘L 都会发这一条 */  useEffect(() => {
     if (!isDesktop) return;
     let unlisten: (() => void) | undefined;
     let cancelled = false;
@@ -176,16 +207,62 @@ export default function App() {
     );
   }
 
+  /* 重新初始化的确认框：危险动作要说清「发生了什么 / 影响范围 / 下一步」 */
+  const reinitDialog = (
+    <ConfirmDialog
+      open={reinitOpen}
+      title="重新初始化本机数据？"
+      danger
+      confirmText={reinitBusy ? "正在处理…" : "移到一边并重新建档"}
+      description={
+        <>
+          <b>会发生什么：</b>当前这份打不开的加密库（{info.dataDir ?? "本机数据目录"}/data.db）
+          会被<b>改名</b>成 <code>data.db.bak-&lt;时间戳&gt;</code> 留在原目录，
+          然后应用回到首启向导，建一套新的库。
+          <br />
+          <b>影响范围：</b>旧库<b>不会被删除</b>（仍是加密的，改回文件名就能找回）；
+          导出的加密备份不受影响；钥匙串条目也不动。
+          <br />
+          <b>下一步：</b>走完首启向导即可。若你只是想救回旧数据，先用「从备份恢复」。
+          {reinitError && (
+            <>
+              <br />
+              <span style={{ color: "var(--line-danger)" }}>{reinitError}</span>
+            </>
+          )}
+        </>
+      }
+      onConfirm={() => void startReinitialize()}
+      onCancel={() => setReinitOpen(false)}
+    />
+  );
+
   if (view === "error") {
     return (
       <Stage title="薪邮" titleRight="出了点问题">
         <div className={s.fatal}>
           <h1 className={s.fatalTitle}>没能读到本机状态</h1>
           <p className={s.fatalText}>{fatal}</p>
-          <Button variant="primary" onClick={() => void refresh()}>
-            重试
-          </Button>
+          <div className={s.fatalActions}>
+            <Button variant="primary" onClick={() => void refresh()}>
+              重试
+            </Button>
+            <Button onClick={() => setRestoreOpen(true)}>从备份恢复</Button>
+            <Button
+              onClick={() => {
+                setReinitError(null);
+                setReinitOpen(true);
+              }}
+            >
+              重新初始化
+            </Button>
+          </div>
+          <p className={s.fatalFoot}>
+            「重新初始化」会把这份打不开的旧库改名移到一边（<b>不删除</b>），然后重新建档。
+            旧数据还在，只是当前打不开。
+          </p>
         </div>
+        {reinitDialog}
         {restoreDialog}
       </Stage>
     );
@@ -198,10 +275,11 @@ export default function App() {
           dataDir={info.dataDir}
           onRetrySucceeded={() => void refresh()}
           onReinitialize={() => {
-            setReinit(true);
-            setView("setup");
+            setReinitError(null);
+            setReinitOpen(true);
           }}
         />
+        {reinitDialog}
         {restoreDialog}
       </Stage>
     );
@@ -321,7 +399,7 @@ function Workbench({
         <ReadOnlyBanner message={status.readOnlyMessage} />
       )}
 
-      {active === "settings" ? (
+      {active === "settings" || active === "security" ? (
         <SettingsPanel
           dataDir={info.dataDir}
           version={info.version}
@@ -338,14 +416,18 @@ function Workbench({
         <TemplateEditor />
       ) : active === "periods" ? (
         <PeriodPanel />
+      ) : active === "export" ? (
+        <ExportScreen />
       ) : active === "import" ? (
         <ImportWizard />
       ) : active === "preview" ? (
         <VerifyPanel />
+      ) : active === "queue" ? (
+        <QueuePanel />
       ) : active === "history" ? (
         <HistoryPanel />
       ) : active === "overview" ? (
-        <Overview />
+        <Overview onGoPeriods={() => setActive("periods")} />
       ) : (
         <Card title="占位界面">
           <div className={s.placeholderText}>
@@ -357,14 +439,18 @@ function Workbench({
   );
 }
 
-function Overview() {
+function Overview({ onGoPeriods }: { onGoPeriods?: () => void }) {
   const toast = useToast();
   return (
     <>
       <PaneHead
         title="早上好，管理员"
         sub="2026 年 11 月 9 日 · 本月发薪尚未开始"
-        actions={<Button variant="primary">＋ 新建月份账套</Button>}
+        actions={
+          <Button variant="primary" onClick={() => onGoPeriods?.()}>
+            ＋ 新建月份账套
+          </Button>
+        }
       />
 
       <StatGrid>
@@ -409,7 +495,7 @@ function Overview() {
           title="还没有任何月份数据"
           hint="先导出空模板，再导入财务填好的 Excel"
           action={
-            <Button variant="primary" size="sm">
+            <Button variant="primary" size="sm" onClick={() => onGoPeriods?.()}>
               ＋ 新建月份账套
             </Button>
           }

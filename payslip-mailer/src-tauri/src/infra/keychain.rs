@@ -19,7 +19,11 @@
 // 「接了线却又没人用」也一起静默掉，定点 allow 不会。
 
 use std::fmt;
-use std::path::{Path, PathBuf};
+// PathBuf 不在这里 import：它在下面只被 #[cfg(debug_assertions)] 的 dev_keychain_path()
+// 用到，而 release 构建关掉 debug_assertions —— 那时这条 import 会变成未使用告警。
+// 开发构建与测试构建都过，门禁（clippy 跑 dev profile）看不到它，
+// 只有 release 构建才报（TC-600 实测）。开发钥匙串那处直接写全路径 std::path::PathBuf。
+use std::path::Path;
 
 use core_foundation::data::CFData;
 use security_framework::base::Error as SfError;
@@ -124,9 +128,9 @@ const DEV_KEYCHAIN_PASSWORD: &str = "xinyou-dev-keychain";
 
 /// 开发钥匙串文件的位置。与 `scripts/setup-dev-keychain.sh` 里建的那个是同一个。
 #[cfg(debug_assertions)]
-fn dev_keychain_path() -> PathBuf {
+fn dev_keychain_path() -> std::path::PathBuf {
     let home = std::env::var("HOME").expect("没有 HOME");
-    PathBuf::from(home)
+    std::path::PathBuf::from(home)
         .join("Library/Keychains")
         .join("xinyou-dev.keychain-db")
 }

@@ -1,9 +1,8 @@
 //! 应用级 Command：版本、隐私承诺与运行状态自检。
 //! 后续 P1 起在这里接入「是否已初始化」「是否已解锁」等全局状态。
 
-use crate::error::{AppError, AppResult};
+use crate::error::AppResult;
 use serde::Serialize;
-use tauri::Manager;
 
 /// 应用自述信息。
 ///
@@ -22,13 +21,9 @@ pub struct AppInfo {
 
 #[tauri::command]
 pub fn app_info(app: tauri::AppHandle) -> AppResult<AppInfo> {
-    // 解析不出数据目录时不返回一个「看着能用」的兜底路径：
-    // 加密库、备份、日志全都无处可放，与其静默降级不如让使用者立刻知道。
-    let data_dir = app
-        .path()
-        .app_data_dir()
-        .map(|p| p.to_string_lossy().to_string())
-        .map_err(|e| AppError::Io(format!("无法定位本机数据目录：{e}")))?;
+    // 数据目录的真相源在 `crate::paths`（发布构建 = app_data_dir()，
+    // 开发构建 = 同名加 -dev 后缀，两边各用各的库）。
+    let data_dir = crate::paths::data_dir(&app)?.to_string_lossy().to_string();
 
     Ok(AppInfo {
         name: "薪邮 Payslip Mailer",

@@ -24,7 +24,9 @@ if [ ! -e "$APP_PATH" ]; then
 fi
 
 if ! xcrun notarytool history --keychain-profile "$PROFILE" >/dev/null 2>&1; then
-  echo "✗ 没有名为「$PROFILE」的公证凭据。" >&2
+  # 变量后紧跟全角标点必须写 ${PROFILE}：bash 会把多字节字符的首字节并进变量名，
+  # 配合 set -u 会报 “unbound variable”（TC-600 实测，同一处坑 release.sh 也踩过）。
+  echo "✗ 没有名为「${PROFILE}」的公证凭据。" >&2
   echo "  先执行：xcrun notarytool store-credentials \"$PROFILE\" --apple-id ... --team-id ... --password ..." >&2
   exit 1
 fi

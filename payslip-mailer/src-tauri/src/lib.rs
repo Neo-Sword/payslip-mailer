@@ -12,6 +12,7 @@ mod commands;
 mod domain;
 mod error;
 mod infra;
+mod paths;
 mod util;
 
 /// TC-103 的验收测试集中在这里（只编进测试构建，不进生产二进制）。
@@ -135,6 +136,7 @@ pub fn run() {
             commands::auth::lock_now,
             commands::auth::change_password,
             commands::auth::set_idle_lock_minutes,
+            commands::auth::reinitialize_local_state,
             commands::backup::export_backup,
             commands::backup::list_backups,
             commands::backup::restore_backup,

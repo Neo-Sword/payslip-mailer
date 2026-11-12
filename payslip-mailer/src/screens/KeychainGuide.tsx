@@ -67,7 +67,7 @@ export function KeychainGuide({
           <p className={s.path}>
             旧数据文件仍在：<code>{dataDir}/data.db</code>
             <br />
-            下面的两个动作都不会删除它。
+            下面的两个动作都不会删除它（重新初始化只是把它改名移走）。
           </p>
         )}
       </div>
@@ -86,7 +86,8 @@ export function KeychainGuide({
       </div>
 
       <p className={s.foot}>
-        「重新初始化」会重新走一遍首启向导。若旧数据还要保留，请先把它移走或改名。
+        「重新初始化」会把旧库改名移到一边（<b>不删除</b>），然后重新走一遍首启向导。
+        想先试试能不能接上，请点「重试」。
       </p>
     </div>
   );

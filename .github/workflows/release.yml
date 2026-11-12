@@ -86,7 +86,10 @@ jobs:
         with:
           name: payslip-mailer-dmg
           # 产物在 artifacts/ 而不是 dist/：dist 是 vite 的输出目录，会被前端构建清空。
+          # 发布记录（版本 / 体积 / SHA-256 / 架构证据 / Gatekeeper 实测输出）一起带上，
+          # 它是这次分发的可追溯凭据（TC-600）。
           path: |
             payslip-mailer/artifacts/*.dmg
             payslip-mailer/artifacts/*.sha256
+            payslip-mailer/artifacts/发布记录-*.md
           if-no-files-found: error

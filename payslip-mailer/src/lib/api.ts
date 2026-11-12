@@ -82,6 +82,12 @@ async function call<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
 /* ---------------- 后端返回的数据形状 ---------------- */
 
 /** `infra::admins::AdminState`（serde camelCase） */
+/** 「把旧库移到一边」的结果：旧库去了哪（没移走时是 null） */
+export interface ArchiveReport {
+  previousPath: string;
+  archivedPath: string | null;
+}
+
 export interface AdminState {
   initialized: boolean;
   email: string | null;
@@ -488,6 +494,9 @@ export const api = {
     call<void>("change_password", { oldPassword, newPassword }),
   setIdleLockMinutes: (minutes: number): Promise<void> =>
     call<void>("set_idle_lock_minutes", { minutes }),
+  /** 把读不出来的旧库移到一边（不删），以便重新初始化 */
+  reinitializeLocalState: (): Promise<ArchiveReport> =>
+    call<ArchiveReport>("reinitialize_local_state"),
   exportBackup: (password: string): Promise<BackupFileInfo> =>
     call<BackupFileInfo>("export_backup", { password }),
   listBackups: (): Promise<BackupFileInfo[]> => call<BackupFileInfo[]>("list_backups"),
@@ -611,8 +620,12 @@ export const api = {
       totalDeductions,
     });
   },
-  previewTemplateHeader: (periodId: number): Promise<SheetSchema> =>
-    call<SheetSchema>("preview_template_header", { periodId }),
+  previewTemplateHeader: async (periodId: number): Promise<SheetSchema> => {
+    if (!previewMode) return await call<SheetSchema>("preview_template_header", { periodId });
+    // 预览模式：表头 = 3 个固定列 + 预览字段集（与后端 ADR-0020 的口径一致）。
+    // 没有这一段，浏览器预览里这一屏永远是「0 列 + 报错」，调样式根本无从下手。
+    return { columns: PREVIEW_SHEET_COLUMNS };
+  },
   exportTemplate: (
     periodId: number,
     includeInstructions: boolean,
@@ -722,6 +735,17 @@ export const api = {
     call<TestResult>("test_smtp_connection", { settings, password }),
   listSendHistory: (): Promise<HistoryEntry[]> =>
     call<HistoryEntry[]>("list_send_history"),
+  /** 发送队列用：列出全部批次（含进度统计） */
+  listSendBatches: async (): Promise<BatchRow[]> => {
+    if (!previewMode) return await call<BatchRow[]>("list_send_batches");
+    return PREVIEW_BATCHES;
+  },
+  pauseSendBatch: (batchId: number): Promise<void> =>
+    call<void>("pause_send_batch", { batchId }),
+  resumeSendBatch: (batchId: number): Promise<void> =>
+    call<void>("resume_send_batch", { batchId }),
+  abortSendBatch: (batchId: number): Promise<void> =>
+    call<void>("abort_send_batch", { batchId }),
   getBatchJobs: (batchId: number): Promise<JobDetail[]> =>
     call<JobDetail[]>("get_batch_jobs", { batchId }),
   exportBatchVoucher: (batchId: number): Promise<string> =>
@@ -835,6 +859,31 @@ const PREVIEW_VARIABLES: VariableInfo[] = [
 const PREVIEW_PERIODS: PeriodRow[] = [
   { id: 1, yearMonth: "2026-10", status: "draft", fieldSnapshot: null, lockedAt: null, editable: true, readOnly: false },
   { id: 2, yearMonth: "2026-09", status: "sent", fieldSnapshot: "[]", lockedAt: 1790000000, editable: false, readOnly: true },
+];
+
+/** 预览模式下的假批次（发送队列那屏）。 */
+const PREVIEW_BATCHES: BatchRow[] = [
+  { id: 7, periodId: 1, status: "running", ratePerMin: 30, total: 42, success: 27, failed: 1, startedAt: 1790000000, finishedAt: null },
+  { id: 6, periodId: 2, status: "finished", ratePerMin: 30, total: 41, success: 41, failed: 0, startedAt: 1789000000, finishedAt: 1789000068 },
+];
+
+/**
+ * 预览模式下的空模板表头：**3 个固定列 + 预览字段集**。 *
+ * 口径与后端一致（ADR-0020）：固定列在前（姓名 / 邮箱 / 工号），
+ * 它们是导入映射的锚点；公式列（实发工资）标 `isFormula`，
+ * 导出的文件里那一格写「公式自动计算」而不是数字。
+ */
+const PREVIEW_SHEET_COLUMNS: SheetColumn[] = [
+  { title: "姓名", key: "name", kind: "fixed", required: true, isFormula: false, numeric: false, dataType: "text" },
+  { title: "邮箱", key: "email", kind: "fixed", required: true, isFormula: false, numeric: false, dataType: "text" },
+  { title: "工号", key: "employee_no", kind: "fixed", required: false, isFormula: false, numeric: false, dataType: "text" },
+  { title: "基本工资", key: "base_salary", kind: "field", required: true, isFormula: false, numeric: true, dataType: "money" },
+  { title: "绩效奖金", key: "performance", kind: "field", required: false, isFormula: false, numeric: true, dataType: "money" },
+  { title: "餐补", key: "meal_allowance", kind: "field", required: false, isFormula: false, numeric: true, dataType: "money" },
+  { title: "社保个人", key: "social_insurance", kind: "field", required: false, isFormula: false, numeric: true, dataType: "money" },
+  { title: "公积金", key: "housing_fund", kind: "field", required: false, isFormula: false, numeric: true, dataType: "money" },
+  { title: "实发工资", key: "net_pay", kind: "field", required: true, isFormula: true, numeric: true, dataType: "formula" },
+  { title: "备注", key: "remark", kind: "field", required: false, isFormula: false, numeric: false, dataType: "text" },
 ];
 
 const PREVIEW_STATUS: Record<string, AdminState> = {

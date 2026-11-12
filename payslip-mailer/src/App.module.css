@@ -30,6 +30,21 @@
   line-height: 1.75;
 }
 
+/* 出错时的三条出路：重试 / 从备份恢复 / 重新初始化 */
+.fatalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-1);
+}
+
+.fatalFoot {
+  font-size: var(--fs-hint);
+  color: var(--tx-muted);
+  line-height: 1.7;
+  max-width: 46em;
+}
+
 .placeholderText {
   font-size: var(--fs-body);
   color: var(--tx-muted);

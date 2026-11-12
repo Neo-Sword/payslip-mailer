@@ -127,12 +127,12 @@ export function SetupWizard({
 
       {reinitialize && (
         <div className={s.notice} role="alert">
-          <b>重新初始化前请先读这段。</b>
+          <b>这是重新初始化。</b>
           <br />
-          旧的 <code>data.db</code> 仍在原目录（{dataDir ?? "本机数据目录"}/data.db），
-          重新初始化<b>不会删除它</b>。当前打不开它，是因为钥匙串里那把库密钥找不到了。
-          请先在「密码与密钥」里恢复对钥匙串的授权后点「重试」；若确定要重新开始，
-          请把旧文件改名或移走，再继续下面的步骤。
+          旧的 <code>data.db</code> 已被改名移走（文件名带 <code>.bak-时间戳</code>，
+          仍在原目录，<b>没有被删除</b>）。下面的步骤会建一套全新的库。
+          <br />
+          若旧数据还要，请关掉这里，走「从备份恢复」那条路。
         </div>
       )}
 

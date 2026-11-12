@@ -18,9 +18,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use serde::Serialize;
-use tauri::Manager;
 
-use crate::error::{AppError, AppResult};
+use crate::error::AppResult;
 use crate::infra::admins::{self, AdminState, UnlockEnv};
 use crate::infra::db::{CIPHER_PARAMS, DbState};
 use crate::infra::keychain::KeychainStore;
@@ -44,14 +43,11 @@ pub struct UnlockResult {
 
 /// 本机数据目录。与 `app_info` 同一个口径。
 ///
-/// 解析不出来时不返回兜底路径：加密库无处可放，与其静默降级不如立刻让人知道。
-/// 目录名只有一个真相源：`app_data_dir()` 按 bundle id 推出的那个
-/// （ADR-0012 第 1 条）；设计文档里写的旧目录名作废，不在代码里重复它的字面，
-/// 免得它变成第二个「真相源」（TC-103 标准 18 钉的就是这件事）。
+/// 真相源在 [`crate::paths::data_dir`]：发布构建是 `app_data_dir()` 按 bundle id
+/// 推出的那个目录（ADR-0012 第 1 条），开发构建加 `-dev` 后缀（两边各用各的钥匙串，
+/// 共用一个库必然撞「密钥与数据不匹配」—— 口径见 `paths` 模块的说明）。
 fn data_dir(app: &tauri::AppHandle) -> AppResult<PathBuf> {
-    app.path()
-        .app_data_dir()
-        .map_err(|e| AppError::Io(format!("无法定位本机数据目录：{e}")))
+    crate::paths::data_dir(app)
 }
 
 /// 钥匙串句柄：每次 Command 现构造。
@@ -161,6 +157,28 @@ pub fn create_admin(
     crate::infra::templates::ensure_defaults(&db)?;
     watch.touch();
     Ok(())
+}
+
+/// 重新初始化：把**读不出来**的旧库移到一边（**不删**），然后回到首启向导。
+///
+/// 这条命令存在的理由：错误文案里写着「请先从备份恢复或重新完成初始化」，
+/// 而**两条路都没有按钮** —— 使用者被卡在「没能读到本机状态」那一屏，
+/// 唯一能按的「重试」永远不会成功（TC-600 真机验收撞到）。
+///
+/// 口径（`infra::reinit` 模块头写全了）：
+/// - 旧库被**改名**成 `data.db.bak-<时间戳>`，留在原目录，一个字节都没丢；
+/// - **不碰钥匙串**：下一次建档会用同一条目名写入新密钥（覆盖写），
+///   主动删条目反而会造出「库没了、条目还在」的半成品状态（ADR-0014 要避免的那一侧）；
+/// - **不碰备份**：导出的加密备份还在 `exports/` 里，那是「从备份恢复」那条路的输入。
+#[tauri::command]
+pub fn reinitialize_local_state(
+    app: tauri::AppHandle,
+    db: tauri::State<'_, Arc<DbState>>,
+) -> AppResult<crate::infra::reinit::ArchiveReport> {
+    let dir = data_dir(&app)?;
+    // 先关库：文件被移走时连接还开着，SQLite 会在旧路径上留下尾巴。
+    db.close();
+    crate::infra::reinit::archive_local_db(&dir)
 }
 
 /// 设置页（S14）要显示的当前值：空闲阈值（下拉初值，spec 范围 11）、
