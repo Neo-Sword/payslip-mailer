@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import html as _html
 import re
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
@@ -79,10 +80,19 @@ def parse_taskboard():
         spec = sm.group(1) if sm else ""
         if spec.startswith("specs/"):
             spec = "docs/" + spec
+        # 状态列可能带附注（如「blocked（需真实凭据）」）：拆开，
+        # 状态用于配色与计数，附注单独显示 —— 否则 TC-501 会因为多出的括号
+        # 落到「未开始」的配色上（它其实是被阻塞）。
+        raw_status = cells[2].strip("*").strip()
+        m_note = re.match(r"^([a-z_]+)[（(](.+)[)）]\s*$", raw_status)
+        status = m_note.group(1) if m_note else raw_status
+        status_note = m_note.group(2) if m_note else ""
         rows.append({
             "id": cid,
             "title": cells[1].strip("*").strip(),
-            "status": cells[2].strip("*").strip(),
+            "status": status,
+            "statusNote": status_note,
+            "rawStatus": raw_status,
             "deps": cells[3],
             "spec": spec,
             "adrs": cells[5],
@@ -168,8 +178,8 @@ PHASES = [
     ("P2", "配置模块", "TC-200~203 全部结案"),
     ("P3", "数据闭环", "TC-300~303 全部结案；账套→空模板→导入→逐格编辑的月度主链路完整"),
     ("P4", "发送引擎（mock SMTP）", "TC-400~403 全部结案；限速退避 / 三重核对 / 幂等恢复 / 凭证留痕的 Rust 侧完成"),
-    ("P5", "真实邮箱联调", "TC-500 已发出 spec 与 ADR-0027；真机验证仍等飞书专用密码"),
-    ("P6", "发布（未签名内部分发）", "TC-600 已发出 spec 与 ADR-0028；安装说明与升级演练未开始"),
+    ("P5", "真实邮箱联调", "TC-500 已结案（lettre + rustls 接真 SMTP）；真机联调仍等飞书专用密码 —— TC-501 blocked，TC-502 待决策"),
+    ("P6", "发布（未签名内部分发）", "TC-600 发布链与一页安装说明已落地、TC-602 概览屏接线与依赖漏洞扫描已落地；剩 TC-601 升级演练（真机）与 TC-603 性能目标"),
 ]
 
 
@@ -953,12 +963,53 @@ def rail() -> str:
                    '<div class="nl">' + esc(code) + "<br>" + esc(name) + "</div>"
                    '<div class="nd">' + esc(nd) + "</div></div>")
     out.append("</div>")
-    out.append('<div class="rail-cap"><b>P0 / P2 / P3 / P4 已全部结案</b> —— 月度数据闭环与 Rust 侧发送链路均已落地；'
-               'P1 只剩 TC-103 的 3 条真人真机验收；P5 的 TC-500 已发出 spec 与 ADR-0027，'
-               '真机联调仍等飞书专用密码；P6 未开始。阶段顺序依据 '
-               + a("PREP-CHECKLIST.md", "PREP-CHECKLIST §4") + "。</div>")
+    ps = progress_summary()
+    done = " / ".join(ps["donePhases"]) or "（无）"
+    out.append('<div class="rail-cap"><b>' + esc(done) + ' 已全部结案</b> —— '
+               + esc("任务卡 " + str(ps["counts"].get("accepted", 0)) + " 张已结案"
+                     + ("、" + str(ps["counts"]["in_progress"]) + " 张进行中" if ps["counts"].get("in_progress") else "")
+                     + ("、" + str(ps["counts"]["blocked"]) + " 张阻塞" if ps["counts"].get("blocked") else "")
+                     + ("、" + str(ps["counts"]["pending"]) + " 张未开始" if ps["counts"].get("pending") else "")
+                     + "。")
+               + ' 阶段顺序依据 ' + a("PREP-CHECKLIST.md", "PREP-CHECKLIST §4") + "。</div>")
     return "".join(out)
 
+
+def progress_summary() -> dict:
+    """从看板算进度小结 —— **不写死数字**。
+
+    写死过一次就过时一次（上一版还写着「仓库仍是零 commit」），
+    所以这里的每个数字都从 `TASKS` 算出来。
+    """
+    counts: dict[str, int] = {}
+    ids: dict[str, list[str]] = {}
+    notes: dict[str, list[str]] = {}
+    for r in TASKS:
+        st = r["status"]
+        counts[st] = counts.get(st, 0) + 1
+        ids.setdefault(st, []).append(r["id"])
+        if r.get("statusNote"):
+            notes.setdefault(st, []).append(f"{r['id']}（{r['statusNote']}）")
+    done_phases = []
+    for code, _name, _cap in PHASES:
+        rows = [r for r in TASKS if phase_of(r["id"]) == code]
+        if rows and all(r["status"] == "accepted" for r in rows):
+            done_phases.append(code)
+    return {"counts": counts, "ids": ids, "notes": notes, "donePhases": done_phases}
+
+
+def git_commit_count() -> int | None:
+    """仓库的提交数（总纲里那句「已提交 N 次」）。没有 git 或不是仓库时是 None。"""
+    try:
+        out = subprocess.run(
+            ["git", "rev-list", "--count", "HEAD"],
+            cwd=ROOT, capture_output=True, text=True, timeout=10,
+        )
+        if out.returncode == 0:
+            return int(out.stdout.strip())
+    except Exception:
+        pass
+    return None
 
 def devboard() -> str:
     out = ['<div class="devboard">',
@@ -977,6 +1028,8 @@ def devboard() -> str:
         for r in rows:
             meta = META.get(r["id"], ("（目标待补：请在生成器的 META 里补一句）", 1))
             label, cls = STATUS.get(r["status"], (r["status"], "bno"))
+            if r.get("statusNote"):
+                label = label + " · " + r["statusNote"]
             if r["spec"]:
                 cell = a(r["spec"], r["id"])
                 hasspec = "1"
@@ -1031,11 +1084,26 @@ def board() -> str:
                '<div class="stat"><b>' + str(n_adr) + '</b><span>已定 ADR</span></div>'
                '<div class="stat"><b>' + str(n_spec) + '</b><span>任务规格</span></div></div>')
     out.append('<div class="fill" id="fill"></div>')
-    out.append('<div class="chipline">'
-               '<span class="kchip g">✅ P0 / P2 / P3 / P4 全部结案：月度数据闭环 + Rust 侧发送链路完成，accepted 11→18</span>'
-               '<span class="kchip">🔄 P1 仅剩 TC-103 的 3 条真人真机验收；TC-500 已发出 spec 与 ADR-0027</span>'
-               '<span class="kchip r">🔴 P5 真机联调仍等飞书专用密码（TC-501 / 502 未开始）</span>'
-               '<span class="kchip">⚠️ 仓库仍是零 commit，CI 首跑待首次 push</span></div>')
+    ps2 = progress_summary()
+    c, ids, notes = ps2["counts"], ps2["ids"], ps2["notes"]
+
+    def _chip(st: str, mark: str, cls: str) -> str:
+        if not c.get(st):
+            return ""
+        head = mark + " " + st + " " + str(c[st]) + " 张"
+        detail = "、".join(notes.get(st, ids.get(st, [])))
+        return '<span class="kchip ' + cls + '">' + esc(head + ("：" + detail if detail else "")) + "</span>"
+
+    chips = "".join([
+        _chip("accepted", "✅", "g"),
+        _chip("in_progress", "🔄", ""),
+        _chip("blocked", "🔴", "r"),
+        _chip("pending", "⬜", ""),
+    ])
+    ncommits = git_commit_count()
+    if ncommits is not None:
+        chips += '<span class="kchip">📦 仓库已提交 ' + str(ncommits) + " 次</span>"
+    out.append('<div class="chipline">' + chips + "</div>")
     out.append("</div>")
     return "".join(out)
 
