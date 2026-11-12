@@ -38,6 +38,9 @@ pub fn export_backup(
     let stamp = timestamp();
     let path = next_free_path(&exports, &stamp);
     let manifest = backup::export(&db, &password, BackupKind::Manual, &path)?;
+    // 记「上次导出备份时刻」：设置页的常驻备份提醒靠它说话（TC-602 · ch.14）。
+    // 写在导出**成功之后** —— 失败的那次不算备份过。
+    backup::set_last_exported_at(&db, manifest.created_at)?;
     Ok(BackupFileInfo {
         path: path.to_string_lossy().to_string(),
         name: file_name(&path),

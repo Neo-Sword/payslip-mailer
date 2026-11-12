@@ -1,0 +1,38 @@
+/* ============================================================
+   S03 · 工作台首页（TC-602）
+   全部接真实数据之后，这一屏只剩排版。
+   ============================================================ */
+
+.hint {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.8;
+}
+
+.emptyBox {
+  padding: var(--sp-4);
+}
+
+.progressWrap {
+  margin-top: var(--sp-2);
+}
+
+.actions {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+
+.failed {
+  color: var(--dang-text);
+}
+
+.error {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  line-height: 1.7;
+}

@@ -1,0 +1,26 @@
+# 依赖漏洞的豁免表（TC-602 · ADR-0031）
+#
+# 规则：**豁免只写在这里**，不写在命令行参数里 —— 参数会被复制粘贴丢掉，
+# 这个文件不会，而且它可 grep、可评审。
+#
+# 下面这一条是**唯一**的豁免。新出现的漏洞一律让门禁红，不往这里加。
+
+[advisories]
+ignore = [
+    # RUSTSEC-2026-0459 / CVE-2026-119375 —— libsqlite3-sys 0.35.0（C SQLite，medium 6.8）
+    #
+    # 为什么不可达：这条 CVE 的触发前提是「受害者打开库文件，且它旁边有一个
+    # page size 不同的 -wal 兄弟文件」。本项目**从不开 WAL**（journal_mode = delete，
+    # ADR-0010 第 5 条；SQLite 在 delete 模式下根本不会创建 -wal 文件），
+    # 所以攻击者没有投放载体。
+    #
+    # 依据是可跑的断言：Rust 单测 `db_journal_mode_stays_delete` 断言
+    # `PRAGMA journal_mode` 必须是 delete —— 它红了，这条豁免的前提就没了，
+    # 门禁会同时红。（TC-602 验收标准 8）
+    #
+    # 为什么不升级：公告明写 bundled-sqlcipher 在 libsqlite3-sys 0.39.x 上
+    # 仍然打包 SQLite 3.53.4（依旧中招）—— 升级 rusqlite 0.37 → 0.41 修不掉这一支，
+    # 却要付 API 破坏 + Rust 1.89 + 三百多条测试重验的代价。
+    # 等 sqlcipher-src 跟进 SQLite 3.54+ 再升（ADR-0031 的重新评估条件）。
+    "RUSTSEC-2026-0459",
+]

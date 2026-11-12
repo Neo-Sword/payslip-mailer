@@ -1,22 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
-import { AppShell, PaneHead } from "./components/layout/AppShell";
+import { AppShell } from "./components/layout/AppShell";
 import { Stage } from "./components/layout/Stage";
-import {
-  Button,
-  Card,
-  Chip,
-  Column,
-  ConfirmDialog,
-  Empty,
-  Progress,
-  Stat,
-  StatGrid,
-  Steps,
-  Table,
-  ToastProvider,
-  useToast,
-} from "./components/ui";
+import { Button, Card, ConfirmDialog, Modal, ToastProvider } from "./components/ui";
 import {
   adminStatusForDisplay,
   api,
@@ -39,6 +25,7 @@ import { ImportWizard } from "./screens/ImportWizard";
 import { VerifyPanel } from "./screens/VerifyPanel";
 import { QueuePanel } from "./screens/QueuePanel";
 import { HistoryPanel } from "./screens/HistoryPanel";
+import { OverviewPanel } from "./screens/OverviewPanel";
 import { SetupWizard } from "./screens/SetupWizard";
 import "./styles/tokens.css";
 import "./styles/global.css";
@@ -60,6 +47,9 @@ import s from "./App.module.css";
    ============================================================ */
 
 type View = "loading" | "setup" | "locked" | "unlocked" | "keychain" | "error";
+
+/** 「首启后的备份引导」已经提醒过的标记（界面偏好，不进加密库） */
+const BACKUP_PROMPT_KEY = "payslip.backupPromptDismissed";
 
 interface AppInfoState {
   version: string;
@@ -83,6 +73,10 @@ export default function App() {
   const [reinitError, setReinitError] = useState<string | null>(null);
   /** 恢复对话框由 App 持有：锁屏（忘了口令）与工作台（设置页）两处都要用它 */
   const [restoreOpen, setRestoreOpen] = useState(false);
+  /** 工作台当前在哪一屏 —— 提到 App 层，「首启后的备份引导」要能跳到设置页 */
+  const [active, setActive] = useState("overview");
+  /** 首启后的备份引导（TC-602 · ch.14） */
+  const [backupPromptOpen, setBackupPromptOpen] = useState(false);
 
   /** 读一次状态，按结果决定渲染哪一屏 */
   const refresh = useCallback(async () => {
@@ -105,6 +99,36 @@ export default function App() {
         setFatal(err.message || "读取本机状态失败。");
         setView("error");
       }
+    }
+  }, []);
+
+  /**
+   * 首启建档完成后的备份引导（ch.14「首次启动强制引导导出加密备份」）。
+   *
+   * 落地口径是**引导 + 只提醒一次**，不是硬拦截 ——
+   * 硬拦截会在「还没有任何数据」的时候逼人导出一份空库，那时备份没有意义；
+   * 真正兜底的是设置页里**常驻**的那条提醒。
+   *
+   * 「提醒过了」记在 localStorage：它是界面偏好，不是业务数据，
+   * 不该进加密库；它也没有外部副作用，不违反红线 5。
+   */
+  const maybePromptBackup = useCallback(async () => {
+    try {
+      if (window.localStorage.getItem(BACKUP_PROMPT_KEY)) return;
+      const st = await api.getSettings();
+      if (st.lastExportedAt !== null) return; // 已经备份过 → 不用打扰
+      setBackupPromptOpen(true);
+    } catch {
+      /* 读不到就当没这回事，不打断首启 */
+    }
+  }, []);
+
+  const dismissBackupPrompt = useCallback(() => {
+    setBackupPromptOpen(false);
+    try {
+      window.localStorage.setItem(BACKUP_PROMPT_KEY, "1");
+    } catch {
+      /* 记不住就下次再提醒一次，不值得为它报错 */
     }
   }, []);
 
@@ -292,7 +316,10 @@ export default function App() {
           version={info.version}
           dataDir={info.dataDir}
           reinitialize={reinit}
-          onDone={() => void refresh()}
+          onDone={() => {
+            void refresh();
+            void maybePromptBackup();
+          }}
         />
         {restoreDialog}
       </Stage>
@@ -319,63 +346,64 @@ export default function App() {
       <Workbench
         status={status}
         info={info}
+        active={active}
+        onNavigate={setActive}
         onLock={() => void refresh()}
         onRestored={() => void refresh()}
         onWiped={() => void refresh()}
       />
+      <Modal
+        open={backupPromptOpen}
+        title="导一份加密备份？"
+        onClose={dismissBackupPrompt}
+        footer={
+          <>
+            <Button variant="ghost" onClick={dismissBackupPrompt}>
+              以后再说
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                setBackupPromptOpen(false);
+                setActive("settings");
+              }}
+            >
+              去导一份
+            </Button>
+          </>
+        }
+      >
+        <p>
+          这个应用的数据<b>只存在这台机器上</b>。一旦丢失（钥匙串条目被清理工具删掉、
+          管理员口令忘记、磁盘损坏），<b>没有任何找回的办法</b>。
+          导一份加密备份放在这台机器以外的地方，只要几分钟。
+        </p>
+      </Modal>
       {restoreDialog}
     </ToastProvider>
   );
 }
 
-/* ============================================================
-   工作台占位（S03 原型结构，数据仍是写死的 mock）
-   ============================================================ */
-
-interface Batch {
-  name: string;
-  scope: string;
-  count: number;
-  result: "ok" | "warn";
-  time: string;
-}
-
-const BATCHES: Batch[] = [
-  { name: "2026-10 工资条", scope: "全员 / 3 组", count: 42, result: "ok", time: "11-05 09:42" },
-  { name: "2026-10 补发（王五）", scope: "单人", count: 1, result: "ok", time: "11-05 10:03" },
-  { name: "2026-09 工资条", scope: "全员 / 3 组", count: 41, result: "ok", time: "10-05 09:18" },
-  { name: "2026-08 工资条", scope: "研发组", count: 18, result: "warn", time: "09-05 14:20" },
-];
-
-const BATCH_COLUMNS: Column<Batch>[] = [
-  { key: "name", header: "批次", render: (r) => <b>{r.name}</b> },
-  { key: "scope", header: "范围", render: (r) => r.scope },
-  { key: "count", header: "数量", numeric: true, render: (r) => r.count },
-  {
-    key: "result",
-    header: "结果",
-    render: (r) =>
-      r.result === "ok" ? <Chip tone="ok">全部成功</Chip> : <Chip tone="warn">1 失败已补发</Chip>,
-  },
-  { key: "time", header: "时间", render: (r) => r.time },
-];
-
 function Workbench({
   status,
   info,
+  active,
+  onNavigate,
   onLock,
   onRestored,
   onWiped,
 }: {
   status: AdminState | null;
   info: AppInfoState;
+  /** 当前导航项 —— 提到 App 层是为了让「首启后的备份引导」也能跳到设置页 */
+  active: string;
+  onNavigate: (id: string) => void;
   onLock: () => void;
   /** 恢复完数据：重新读一次状态（成员/批次可能都变了） */
   onRestored: () => void;
   /** 清空完数据：重新读一次状态 → 回到 S01 首启向导 */
   onWiped: () => void;
 }) {
-  const [active, setActive] = useState("overview");
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -383,7 +411,7 @@ function Workbench({
       title="薪邮"
       titleRight="无遥测 · 本机数据"
       active={active}
-      onNavigate={setActive}
+      onNavigate={onNavigate}
       collapsed={collapsed}
       onToggleCollapse={() => setCollapsed((v) => !v)}
       footer={
@@ -427,7 +455,11 @@ function Workbench({
       ) : active === "history" ? (
         <HistoryPanel />
       ) : active === "overview" ? (
-        <Overview onGoPeriods={() => setActive("periods")} />
+        <OverviewPanel
+          onGoPeriods={() => onNavigate("periods")}
+          onGoImport={() => onNavigate("import")}
+          onGoPreview={() => onNavigate("preview")}
+        />
       ) : (
         <Card title="占位界面">
           <div className={s.placeholderText}>
@@ -436,98 +468,5 @@ function Workbench({
         </Card>
       )}
     </AppShell>
-  );
-}
-
-function Overview({ onGoPeriods }: { onGoPeriods?: () => void }) {
-  const toast = useToast();
-  return (
-    <>
-      <PaneHead
-        title="早上好，管理员"
-        sub="2026 年 11 月 9 日 · 本月发薪尚未开始"
-        actions={
-          <Button variant="primary" onClick={() => onGoPeriods?.()}>
-            ＋ 新建月份账套
-          </Button>
-        }
-      />
-
-      <StatGrid>
-        <Stat value={42} label="在册成员" />
-        <Stat value={3} label="邮件组" />
-        <Stat value={10} label="已配置工资项" tone="accent" />
-        <Stat value="100%" label="上月送达率" tone="ok" />
-      </StatGrid>
-
-      <Card title="2026 年 10 月 · 发薪流程" actions={<Chip tone="ok">已归档</Chip>}>
-        <Steps
-          items={[
-            { label: "导出模板", state: "done" },
-            { label: "导入数据", state: "done" },
-            { label: "预览核对", state: "done" },
-            { label: "发送完成", state: "done" },
-          ]}
-        />
-        <div className={s.placeholderText}>42 封全部送达，0 失败 · 日志已归档，可随时导出凭证</div>
-      </Card>
-
-      <Card
-        title="最近发送批次"
-        flush
-        actions={<span className={s.placeholderText}>查看全部 →</span>}
-      >
-        <Table columns={BATCH_COLUMNS} rows={BATCHES} rowKey={(r) => r.name} />
-      </Card>
-
-      <Card title="本月发薪进度" tone="accent">
-        <div className={s.placeholderText}>
-          · 2026 年 11 月账套尚未创建，建议先导出空模板给财务填写
-        </div>
-        <div style={{ marginTop: 10 }}>
-          <Progress value={66} />
-        </div>
-      </Card>
-
-      <Card title="空状态示例">
-        <Empty
-          icon="▤"
-          title="还没有任何月份数据"
-          hint="先导出空模板，再导入财务填好的 Excel"
-          action={
-            <Button variant="primary" size="sm" onClick={() => onGoPeriods?.()}>
-              ＋ 新建月份账套
-            </Button>
-          }
-        />
-      </Card>
-
-      <Card title="设计系统自检">
-        <div className={s.placeholderText}>
-          · 设计 Token 与组件库已接入
-          <br />· 上面统计块、表格、步骤条、进度条均为原型 S03 的真实结构
-        </div>
-        <div className={s.selfCheck}>
-          <Button onClick={() => toast.push({ tone: "ok", text: "模板已导出" })}>
-            触发成功 toast
-          </Button>
-          <Button
-            onClick={() =>
-              toast.push({
-                tone: "danger",
-                text: "1 封发送失败",
-                sticky: true,
-                action: {
-                  label: "仅重试失败项",
-                  onClick: () => toast.push({ tone: "info", text: "已入队重试" }),
-                },
-              })
-            }
-          >
-            触发失败 toast（常驻）
-          </Button>
-        </div>
-      </Card>
-    </>
   );
 }

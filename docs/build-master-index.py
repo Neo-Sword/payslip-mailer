@@ -201,6 +201,7 @@ SPEC_NOTES: dict[str, str] = {
     "TC-402": "恢复语义：存疑 sending 恢复时回 queued（发给本人的重复无害、丢发难查），已成功绝不重发；恢复可重复发起且进度从库算，没有第二份快照；仅重试失败项（dead→queued、attempts 保留）；点发送两层核对；SMTP 未配置时如实报「发信设置还没配置」而不是假成功。红线 3 与红线 4 在此兑现。",
     "TC-403": "发送凭证：CSV 六列（姓名/收件地址/状态/SMTP回码/发送时间/内容校验和）且逐格扫不到工资数值；姓名进 CSV 不进日志；脱敏四层（库无正文列 / 审计只记行数 / 凭证无数值 / 日志只记 id 与处置）各自被测试钉住；UTF-8 BOM + RFC 4180；send_jobs 没有删除入口，导出是纯读操作。",
     "TC-500": "SMTP 引擎与 S14 邮件设置：lettre + rustls + ring（不引 native-tls，门禁第 9 项禁 OpenSSL）；Sender trait 改收 EmailMessage、批次带 template_id；专用密码进 Keychain；multipart/alternative 配 text/plain 兜底；每封新建会话；测试连接只发一封自检信。全部自动化验收跑 StubTransport，真凭据真机验证归 TC-501。",
+    "TC-602": "概览屏从整屏假数据接到真实后端（成员/组/字段/送达率、真实批次表、真实账套进度）；设置页常驻备份提醒（app_meta 记 last_exported_at，从没备份过=强提醒、超 30 天=弱提醒）+ 首启后的一次性引导；依赖漏洞扫描（cargo audit）进门禁与 CI，豁免窄到一条且依据是一条可跑的断言。",
     "TC-600": "发布产物与一页安装说明：一条可重复的发布命令（release.sh 跑通并加固）、dmg 随包附一页安装说明（docs/安装说明.md，六节齐全、正文 ≤ 900 字）、一条发布记录（版本 / 体积 / SHA-256 / 架构证据）。未签名的三条真相写进说明：每个新版本手动放行一次、升级后钥匙串授权重置、spctl 预期失败。P6 验收里的「试发一封」需要真实 SMTP 凭据，归 TC-501；升级演练归 TC-601。",
 }
 
@@ -241,6 +242,7 @@ ADR_NOTES: dict[str, str] = {
     "0026": "发送凭证：CSV 六列且无工资数值、姓名进 CSV 不进日志、脱敏四层各有测试、UTF-8 BOM + RFC 4180、send_jobs 没有删除入口（≥2 年留存靠「不删」，唯一终点是 TC-105）、导出是纯读。",
     "0027": "SMTP 引擎：lettre + rustls + ring 避开 OpenSSL（门禁第 9 项）；Sender trait 收 EmailMessage 让渲染留在编排、渲染失败只判该封 dead 而批次继续；批次带 template_id；专用密码进 Keychain；multipart/alternative；每封新建会话；测试连接 = 自检信，自动化验收全跑 StubTransport。",
     "0028": "未签名内部分发的口径：v1 不签名不公证（D8 延续，sign/notarize 留着但默认不跑）；分发判据是 quarantine 属性而不是介质名称（U 盘与局域网共享拷贝不带 → 双击直开，网盘下载带 → 每台机首次手动放行）；钥匙串弹窗必须点「允许」（未签名 ACL 认 cdhash，点「拒绝」会锁在门外）；spctl 预期失败是事实不是缺陷；产物不入 git；升级演练归 TC-601。",
+    "0031": "依赖漏洞的处理口径：cargo audit 进门禁与 CI（发布门槛那句话此前从未被执行过）；豁免只有 RUSTSEC-2026-0459 一条 —— 我们不用 WAL（journal_mode=delete），CVE-2026-119375 的触发前提不成立，而升级 rusqlite 也修不掉 SQLCipher 这一支；豁免的依据是一条可跑的断言（db_journal_mode_stays_delete）。",
     "0029": "重新初始化：读不出来的旧库改名移走（不删、不碰钥匙串、不碰备份），错误页给出重试/从备份恢复/重新初始化三条真能点的路 —— 文案承诺的每条路都必须有按钮顶着。",
     "0030": "开发构建与发布构建分数据目录（dev 用 -dev 后缀）：两边钥匙串本来就不同却共用一个 data.db，必然撞「密钥与数据不匹配」；分流是编译期的，发布二进制里没有 dev 路径。",
 }

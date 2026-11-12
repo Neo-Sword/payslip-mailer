@@ -42,6 +42,9 @@ const SALT_BYTES: usize = 16;
 /// `app_meta` 里记「上次恢复时刻」的键（设计文档 ch.6 的磁盘布局注释里点名过）。
 pub const LAST_RESTORED_KEY: &str = "last_restored_at";
 
+/// `app_meta` 里记「上次导出备份时刻」的键（TC-602 · ch.14 的备份提醒要用）。
+pub const LAST_EXPORTED_KEY: &str = "last_exported_at";
+
 /// 一个备份文件在界面上的样子。
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -534,6 +537,38 @@ pub fn get_last_restored_at(db: &DbState) -> AppResult<Option<i64>> {
         conn.query_row(
             "SELECT value FROM app_meta WHERE key = ?1",
             rusqlite::params![LAST_RESTORED_KEY],
+            |row| row.get::<_, String>(0),
+        )
+        .optional()
+        .map(|v| v.and_then(|s| s.parse().ok()))
+        .map_err(|e| AppError::Database(e.to_string()))
+    })
+}
+
+/// 记「上次导出备份时刻」。导出成功后由调用方写。
+///
+/// 为什么要有它（TC-602 · ch.14 风险缓解）：「凭据丢失 / 忘记管理员密码」是**中风险** ——
+/// 本地加密数据不可恢复。缓解措施写的是「设置页常驻备份提醒」，
+/// 而「常驻提醒」要能说清「你上次备份是什么时候」→ 必须有一个时刻记在库里。
+/// 存在 `app_meta`（键值表），**不需要迁移**。
+pub fn set_last_exported_at(db: &DbState, at: i64) -> AppResult<()> {
+    db.write(|conn| {
+        conn.execute(
+            "INSERT INTO app_meta (key, value) VALUES (?1, ?2) \
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            rusqlite::params![LAST_EXPORTED_KEY, at.to_string()],
+        )
+        .map_err(|e| AppError::Database(e.to_string()))?;
+        Ok(())
+    })
+}
+
+/// 读「上次导出备份时刻」。从没有过备份时是 `None`。
+pub fn get_last_exported_at(db: &DbState) -> AppResult<Option<i64>> {
+    db.read(|conn| {
+        conn.query_row(
+            "SELECT value FROM app_meta WHERE key = ?1",
+            rusqlite::params![LAST_EXPORTED_KEY],
             |row| row.get::<_, String>(0),
         )
         .optional()
@@ -1129,5 +1164,31 @@ mod tests {
                 "清单里不该出现 {forbidden}：{json}"
             );
         }
+    }
+
+    /// TC-602：设置页的常驻备份提醒要能说清「你上次备份是什么时候」——
+    /// 所以这个时刻必须记得住、读得回；从没导出过时是 None（界面据此显示强提醒）。
+    #[test]
+    fn the_last_export_time_is_recorded_and_read_back() {
+        let fx = Fixture::new("last-export");
+        fx.open();
+        assert_eq!(
+            get_last_exported_at(&fx.db).expect("读失败"),
+            None,
+            "从没导出过时应该是 None"
+        );
+
+        set_last_exported_at(&fx.db, 1_790_000_000).expect("写失败");
+        assert_eq!(
+            get_last_exported_at(&fx.db).expect("读失败"),
+            Some(1_790_000_000)
+        );
+
+        // 再写一次是**覆盖**（键值表，不是追加）—— 界面显示的必须是最近一次。
+        set_last_exported_at(&fx.db, 1_800_000_000).expect("写失败");
+        assert_eq!(
+            get_last_exported_at(&fx.db).expect("读失败"),
+            Some(1_800_000_000)
+        );
     }
 }

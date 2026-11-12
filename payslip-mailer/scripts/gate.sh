@@ -92,6 +92,12 @@ else
   printf '  （非 git 仓库，跳过）\n'
 fi
 
+# 依赖漏洞扫描（发布门槛「无高危依赖漏洞」· TC-602 · ADR-0031）。
+# 为什么不是「CI 才跑」：ch.13 那句话此前**从未被执行过** ——
+# 现在它是门禁的一项，每次验收都会跑。豁免写在 .cargo/audit.toml（只有一条，
+# 理由与依据都在那里面）。没装 cargo-audit 时这一项**红**，不当作通过。
+run_gate "依赖漏洞扫描" "bash scripts/audit.sh"
+
 # ── 编译级检查 ──────────────────────────────────────────────────────────
 if [ "$FAST" = "0" ]; then
   run_gate "Rust 静态检查" "cargo clippy --manifest-path src-tauri/Cargo.toml --all-features -- -D warnings"

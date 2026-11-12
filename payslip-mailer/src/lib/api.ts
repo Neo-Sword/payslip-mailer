@@ -115,6 +115,8 @@ export interface SettingsState {
   orgName: string | null;
   /** 上次从备份恢复的时刻（epoch 秒）；没恢复过是 null */
   lastRestoredAt: number | null;
+  /** 上次导出备份的时刻（epoch 秒）；没导出过是 null —— 常驻备份提醒靠它说话 */
+  lastExportedAt: number | null;
 }
 
 /** 备份文件在界面上的样子（`infra::backup::BackupFileInfo`） */
@@ -487,7 +489,16 @@ export const api = {
     call<UnlockResult>("unlock", { password, rememberDevice }),
   createAdmin: (email: string, password: string, orgName: string): Promise<void> =>
     call<void>("create_admin", { email, password, orgName }),
-  getSettings: (): Promise<SettingsState> => call<SettingsState>("get_settings"),
+  getSettings: async (): Promise<SettingsState> => {
+    if (!previewMode) return await call<SettingsState>("get_settings");
+    // 预览模式：备份提醒那一段要有个能看见的样子（TC-602）。
+    return {
+      idleLockMinutes: 10,
+      orgName: "某某科技有限公司",
+      lastRestoredAt: null,
+      lastExportedAt: 1790000000,
+    };
+  },
   appInfo: (): Promise<AppInfo> => call<AppInfo>("app_info"),
   lockNow: (): Promise<void> => call<void>("lock_now"),
   changePassword: (oldPassword: string, newPassword: string): Promise<void> =>
@@ -685,8 +696,10 @@ export const api = {
       path,
       mappings: mappings.map((m) => ({ index: m.index, target: m.target })),
     }),
-  listRecords: (periodId: number): Promise<RecordRow[]> =>
-    call<RecordRow[]>("list_records", { periodId }),
+  listRecords: async (periodId: number): Promise<RecordRow[]> => {
+    if (!previewMode) return await call<RecordRow[]>("list_records", { periodId });
+    return PREVIEW_RECORDS;
+  },
   updateRecordCell: (
     periodId: number,
     memberId: number,
@@ -696,8 +709,10 @@ export const api = {
     call<RecordRow>("update_record_cell", { periodId, memberId, key, value }),
   deleteRecord: (periodId: number, memberId: number): Promise<void> =>
     call<void>("delete_record", { periodId, memberId }),
-  getPeriodTotals: (periodId: number): Promise<PeriodTotals> =>
-    call<PeriodTotals>("get_period_totals", { periodId }),
+  getPeriodTotals: async (periodId: number): Promise<PeriodTotals> => {
+    if (!previewMode) return await call<PeriodTotals>("get_period_totals", { periodId });
+    return { earnings: 18500, deductions: 2350, net: 16150 };
+  },
   verifySendScope: (
     periodId: number,
     memberIds: number[],
@@ -733,8 +748,19 @@ export const api = {
     call<SmtpSettings>("save_smtp_settings", { settings, password }),
   testSmtpConnection: (settings: SmtpSettings, password: string): Promise<TestResult> =>
     call<TestResult>("test_smtp_connection", { settings, password }),
-  listSendHistory: (): Promise<HistoryEntry[]> =>
-    call<HistoryEntry[]>("list_send_history"),
+  listSendHistory: async (): Promise<HistoryEntry[]> => {
+    if (!previewMode) return await call<HistoryEntry[]>("list_send_history");
+    return PREVIEW_BATCHES.map((b) => ({
+      batch: b,
+      progress: {
+        total: b.total,
+        success: b.success,
+        failed: b.failed,
+        pending: Math.max(0, b.total - b.success - b.failed),
+        inFlight: 0,
+      },
+    }));
+  },
   /** 发送队列用：列出全部批次（含进度统计） */
   listSendBatches: async (): Promise<BatchRow[]> => {
     if (!previewMode) return await call<BatchRow[]>("list_send_batches");
@@ -859,6 +885,30 @@ const PREVIEW_VARIABLES: VariableInfo[] = [
 const PREVIEW_PERIODS: PeriodRow[] = [
   { id: 1, yearMonth: "2026-10", status: "draft", fieldSnapshot: null, lockedAt: null, editable: true, readOnly: false },
   { id: 2, yearMonth: "2026-09", status: "sent", fieldSnapshot: "[]", lockedAt: 1790000000, editable: false, readOnly: true },
+];
+
+/** 预览模式下的假工资记录（概览屏算「已导入行数」用）。 */
+const PREVIEW_RECORDS: RecordRow[] = [
+  {
+    memberId: 1,
+    name: "张三",
+    email: "zhangsan@company.com",
+    employeeNo: "E001",
+    values: { base_salary: "18000", performance: "2000", meal_allowance: "300", social_insurance: "1500", housing_fund: "1000", net_pay: "17800" },
+    validation: "",
+    hasProblem: false,
+    source: "import",
+  },
+  {
+    memberId: 2,
+    name: "李四",
+    email: "lisi@company.com",
+    employeeNo: "E002",
+    values: { base_salary: "15000", performance: "1000", meal_allowance: "300", social_insurance: "1200", housing_fund: "800", net_pay: "14300" },
+    validation: "",
+    hasProblem: false,
+    source: "import",
+  },
 ];
 
 /** 预览模式下的假批次（发送队列那屏）。 */

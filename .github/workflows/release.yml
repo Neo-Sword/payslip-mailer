@@ -37,6 +37,13 @@ jobs:
         working-directory: payslip-mailer
         run: npm ci
 
+      # 门禁第 10 项「依赖漏洞扫描」要 cargo-audit（TC-602 · ADR-0031）。
+      # 预编译二进制，CI 里安装很快；豁免表在仓库里（payslip-mailer/.cargo/audit.toml）。
+      - name: 安装 cargo-audit
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+
       # 门禁只有一份定义：scripts/gate.sh。
       # 之前这里逐项列 cargo test / clippy / fmt / npm build，看着步骤更多，实际漏了
       # gate.sh 里那两条本项目专属红线（组件层色值泄漏、Token 引用可解析）与敏感数据检查 ——

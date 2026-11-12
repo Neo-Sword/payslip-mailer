@@ -190,6 +190,9 @@ pub struct SettingsState {
     pub org_name: Option<String>,
     /// 上次从备份恢复的时刻（epoch 秒）。没恢复过是 `None`。
     pub last_restored_at: Option<i64>,
+    /// 上次导出备份的时刻（epoch 秒）。没导出过是 `None` ——
+    /// 设置页的常驻备份提醒靠它说话（TC-602 · ch.14 的风险缓解）。
+    pub last_exported_at: Option<i64>,
 }
 
 /// 读设置页初值。只在解锁状态可达（S14 是工作台里的页面），库是开着的；
@@ -203,6 +206,7 @@ pub fn get_settings(
         idle_lock_minutes: admins::get_idle_lock_minutes(&db)?,
         org_name: admins::get_org_name(&db)?,
         last_restored_at: crate::infra::backup::get_last_restored_at(&db)?,
+        last_exported_at: crate::infra::backup::get_last_exported_at(&db)?,
     };
     watch.touch();
     Ok(state)
