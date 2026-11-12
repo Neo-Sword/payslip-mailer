@@ -1,0 +1,35 @@
+{
+  "name": "payslip-mailer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "typecheck": "tsc --noEmit",
+    "rust:check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "rust:lint": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-features -- -D warnings",
+    "rust:fmt": "cargo fmt --manifest-path src-tauri/Cargo.toml",
+    "rust:fmt:check": "cargo fmt --manifest-path src-tauri/Cargo.toml --check",
+    "gate": "bash scripts/gate.sh",
+    "release": "bash scripts/release.sh",
+    "release:signed": "bash scripts/release.sh --signed"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "~2.12.4",
+    "@tauri-apps/plugin-dialog": "^2.7.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^6.0.2",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16"
+  }
+}

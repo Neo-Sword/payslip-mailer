@@ -1,0 +1,96 @@
+[package]
+name = "payslip-mailer"
+version = "0.1.0"
+description = "薪邮 Payslip Mailer —— macOS 本机工资条群发工具"
+authors = ["Payslip Mailer Team"]
+edition = "2024"
+# edition 2024 需要 Rust 1.85+，Tauri 2.12 的 MSRV 更高，取两者中较高的。
+# ⚠️ 这个值会参与 cargo 的版本解析（MSRV-aware resolver）：写低了不是「编译不过」而是
+# 静默把 tauri 钉在旧 minor，进而与 npm 侧 @tauri-apps/api 错配，
+# 表现为 `tauri build` 报 "Found version mismatched Tauri packages"。见 docs/adr/0007。
+rust-version = "1.88"
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "payslip_mailer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+# 注意：tauri-build 的版本线与 tauri 运行时**不是一套**（tauri 到 2.12.x 时 tauri-build 才 2.7.x），
+# 所以这里不能跟着下面那条 `~2.12` 一起改，否则 cargo 直接找不到候选版本。
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# `~2.12` 与 package.json 里的 `"@tauri-apps/api": "~2.12.4"` 是一对，不能单独动：
+# Tauri CLI 在 build 时比对两侧 major/minor，不一致直接拒绝构建（见 docs/adr/0007）。
+# 用 `~` 而不是 `2`，是为了让「升级 Tauri」必须显式改两处，而不是某一侧被 cargo 悄悄带走。
+tauri = { version = "~2.12", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+security-framework = "3.7.0"
+# security-framework 不在根级 re-export core-foundation，而 `item` 层的读写要构造 `CFData`，
+# 所以必须自己引一次。版本与 security-framework 3.7 的依赖对齐（0.10），避免出现两份 core-foundation。
+core-foundation = "0.10"
+# SQLCipher 走 rusqlite 的 `bundled-sqlcipher`：源码内置，不依赖系统 sqlite3，
+# 也不依赖 Homebrew 的 OpenSSL（见 docs/adr/0010 第 1、2 条）。
+# 这是 TC-100 唯一新增的依赖：CSPRNG 复用已在依赖里的 security-framework，
+# 迁移校验和与十六进制手写，都不为此多引一个 crate。
+# ⚠️ 不加 `bundled-sqlcipher-vendored-openssl`：那条会把 OpenSSL 源码整个编进来，
+#   产物里出现 libcrypto，既增大体积又违反「数据不出本机」里「不引第三方加密栈」的取向。
+# ⚠️ Apple 平台上它靠 build.rs 选 `-DSQLCIPHER_CRYPTO_CC` 走 CommonCrypto；
+#   一旦环境里有 `OPENSSL_DIR`，build.rs 会改走 OpenSSL 并在目录无效时 exit 101
+#   （ADR-0010 实测）。`scripts/env.sh` 与 CI 都不设这个变量，门禁第 9 项用 otool 复查。
+rusqlite = { version = "0.37", features = ["bundled-sqlcipher"] }
+# 管理员口令哈希（TC-102 / ADR-0011 §1）。关掉默认特征只留 `alloc` + `password-hash`：
+# 默认特征会带进 `getrandom`，而全项目的 CSPRNG 源统一是 security-framework 的 SecRandom
+# （ADR-0009），口令的盐也从那里来，不多一个随机源。
+# 实测（`/tmp/argon2-tree.log`）：这个特征组合下 argon2 的依赖闭包恰好 12 个 crate，
+# 逐个扫 `.c`/`.h`/`.S`/`build.rs` 全为 0 —— 纯 Rust，不新增 C 编译单元。
+# `password-hash` 特征给的是 PHC 串格式（`$argon2id$v=19$m=…$盐$哈希`），
+# 盐和参数都写在串里，所以库里只需要一列，见 ADR-0011 §3。
+argon2 = { version = "0.6.0", default-features = false, features = ["alloc", "password-hash"] }
+# 唤醒通知（TC-102 / ADR-0011 §7）：`CFNotificationCenterGetDistributedCenter` 只在 -sys 层，
+# `core-foundation` 0.10 没有包它。它本来就是 `core-foundation 0.10.1` 的依赖、
+# 已在 Cargo.lock 里（0.8.7），所以这里**不新增 crate**，只是把一条传递依赖提成直接依赖。
+core-foundation-sys = "0.8"
+zip = { version = "9.5.1", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+tauri-plugin-dialog = "2.7.3"
+minijinja = { version = "3.1.0", default-features = false, features = ["builtins", "debug", "serde", "unicode"] }
+rust_xlsxwriter = "0.102.0"
+calamine = "0.38.0"
+# SMTP 引擎（TC-500 / ADR-0027 决策 3）：
+# - default-features = false：关掉 `native-tls` 与 `pool`（连接池）。
+#   native-tls 会把 OpenSSL 引进依赖链，威胁门禁第 9 项（otool 查 libcrypto/libssl）；
+#   `pool` 是异步连接池 —— 我们「逐封建立 SMTP 会话」（ch.7），用不上。
+# - rustls-tls = rustls + ring + webpki 根证书：ring 静态编译，otool 不见 libcrypto；
+#   webpki（Mozilla 集合）覆盖飞书/QQ/163/Gmail 等公网 SMTP。
+# - 每个发送一个 transport（见 infra/mailer.rs），「一封出问题不污染下一封」。
+lettre = { version = "0.11.23", default-features = false, features = [
+    "smtp-transport",
+    "builder",
+    "hostname",
+    "rustls-tls",
+] }
+
+# TC-102 验收标准 11：唤醒通知的投递必须在**主线程的 runloop** 上派发（ADR-0011 §10），
+# 而 libtest 把测试体放在工作线程上（实测 `--test-threads=1` 也一样），
+# 单元测试永远泵不到主线程的 runloop。`harness = false` 让这个文件自带 `main()`，
+# 主线程就能自己泵 —— 见 tests/wake_delivery.rs。
+[[test]]
+name = "wake_delivery"
+path = "tests/wake_delivery.rs"
+harness = false
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

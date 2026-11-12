@@ -1,0 +1,92 @@
+name: CI · 测试与发布
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "执行签名公证并产出 dmg"
+        type: boolean
+        default: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  check:
+    name: 测试与门禁
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: payslip-mailer/package-lock.json
+
+      - name: 安装前端依赖
+        working-directory: payslip-mailer
+        run: npm ci
+
+      # 门禁只有一份定义：scripts/gate.sh。
+      # 之前这里逐项列 cargo test / clippy / fmt / npm build，看着步骤更多，实际漏了
+      # gate.sh 里那两条本项目专属红线（组件层色值泄漏、Token 引用可解析）与敏感数据检查 ——
+      # 于是红线只在开发者本机生效，CI 是绿的但规矩没守住。
+      - name: 门禁（fmt / typecheck / clippy / 测试 / Token / 敏感数据）
+        working-directory: payslip-mailer
+        run: bash scripts/gate.sh
+
+      # 目前 package.json 没有 `test` 脚本，`--if-present` 会让这一步静默跳过。
+      # 保留是为了给前端组件测试留位置（首个真正的用例由 TC-103 引入），
+      # 但要知道：现在它是空跑，不是「通过」。
+      - name: 前端单测（当前为空跑）
+        working-directory: payslip-mailer
+        run: npm run test --if-present
+
+  release:
+    name: 构建 dmg
+    needs: check
+    if: github.event_name == 'workflow_dispatch' && inputs.release
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: payslip-mailer/package-lock.json
+
+      - name: 安装前端依赖
+        working-directory: payslip-mailer
+        run: npm ci
+
+      # 决策 D8：不购买 Apple Developer Program，走未签名构建。
+      # 若日后改为签名分发，把下面这一步换成导入证书 + notarytool store-credentials，
+      # 并改用 `bash scripts/release.sh --signed`。
+      - name: 构建 · 制 dmg
+        working-directory: payslip-mailer
+        run: bash scripts/release.sh
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: payslip-mailer-dmg
+          # 产物在 artifacts/ 而不是 dist/：dist 是 vite 的输出目录，会被前端构建清空。
+          path: |
+            payslip-mailer/artifacts/*.dmg
+            payslip-mailer/artifacts/*.sha256
+          if-no-files-found: error

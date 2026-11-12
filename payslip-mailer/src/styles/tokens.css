@@ -1,0 +1,195 @@
+/* ============================================================
+   薪邮 Payslip Mailer · Design Token
+   来源：payslip-mailer-design.html 第 11 章 + 原型 .w-* 样式
+   v1 仅深色主题（决策 D3）；浅色主题延后到 v1.1，届时只换本文件
+   ============================================================ */
+
+:root {
+  /* ---------- 字体 ---------- */
+  --font-sans: "PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei",
+    "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---------- 字号（ch.11 规范）---------- */
+  --fs-title: 16px;
+  --fs-section: 13px;
+  --fs-body: 12px;
+  --fs-hint: 11px;
+  --fs-table: 11.5px;
+
+  /* ---------- 行高 ---------- */
+  --lh-body: 1.6;
+  --row-h: 34px;
+  --row-h-compact: 28px;
+
+  /* ---------- 间距（8px 栅格）---------- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --gutter: 20px;
+
+  /* ---------- 圆角 ---------- */
+  --r-window: 12px;
+  --r-card: 10px;
+  --r-control: 7px;
+  --r-pill: 999px;
+
+  /* ---------- 表面 / 层次 ---------- */
+  --bg-window: #1f2531;
+  --bg-sidebar: #171c26;
+  --bg-card: #262d3b;
+  --bg-raised: #2c3444;
+  --bg-sunken: #1a202b;
+  --bg-titlebar: #242a37;
+  --bg-modal: #242b39;
+  --bg-modal-foot: #202735;
+  --bg-overlay: #0d1119b8;
+  --bg-selected: #202f4d;
+  --bg-input: #1a202b;
+  /* 表头 / 步骤圆点：比卡片再暗一档的凹槽面。
+     不能复用 --bg-card（同色会让表头与卡片糊成一片），也不能复用 --bg-titlebar（语义无关）。 */
+  --bg-well: #222a38;
+  --bg-row-hover: #293243;
+
+  /* ---------- 描边 ---------- */
+  /* 刻意偏离原型的 --line(#2a3140)，Δ≈22 超出「就近归并」范围：
+     原型的描边画在 #0b0d12 的演示页底上，应用的描边画在更亮的卡片面上，照搬会看不见。
+     原型是交互与文案的权威，不是取色权威（它只声明 15 个变量，这里有 120 个）。
+     理由记录在 docs/adr/0005。 */
+  --line: #333d50;
+  --line-soft: #313b4d;
+  --line-input: #394357;
+  --line-sidebar: #2c3444;
+  --line-titlebar: #323b4c;
+  --line-modal: #3b4659;
+  --line-modal-foot: #364054;
+  --line-row: #2e3748;
+  --line-table-head: #35405158;
+  --line-focus: #5b8dff;
+  --line-danger: #c05a68;
+
+  /* ---------- 文字 ---------- */
+  --tx: #e9edf5;
+  --tx-strong: #dfe6f2;
+  --tx-body: #c3ccdc;
+  --tx-muted: #a8b5c9;
+  --tx-secondary: #9aa6bb;
+  --tx-hint: #8e9bb2;
+  --tx-faint: #7f8ca4;
+  --tx-dimmer: #6f7c93;
+  --tx-on-accent: #ffffff;
+
+  /* ---------- 语义色 ---------- */
+  --acc: #5b8dff;
+  --acc-strong: #3f6fd8;
+  --acc-stronger: #4f80ec;
+  --acc-soft: #21345c;
+  --acc-soft-line: #34518e;
+  --acc-text: #a8c2ff;
+  --acc-text-bright: #8fb4ff;
+  /* 主按钮三态：底色用 --acc-strong、hover 升到 --acc-stronger（与原型 .w-btn.pri 一致），
+     边框与按下态比 hover 更亮 / 更暗各一档，原型未定义，故在此命名。 */
+  --acc-stronger-line: #6491f2;
+  --acc-strong-active: #3764c4;
+  /* 强调卡：用于「数据仅存本机」这类信任声明，比 --acc-soft 弱一档 */
+  --acc-card: #1d2a3f;
+
+  --acc2: #8b7bff;
+
+  --ok: #3ecf95;
+  --ok-soft: #163a2d;
+  --ok-soft-line: #256049;
+  --ok-text: #7ce0b1;
+  --ok-text-bright: #6fdcaa;
+  --ok-strong: #1f5c46;
+
+  --warn: #f2b457;
+  --warn-soft: #3c2d15;
+  --warn-soft-line: #5b4520;
+  --warn-text: #f3c072;
+  --warn-text-bright: #f0bd6e;
+  --warn-strong: #33291a;
+
+  --dang: #f4747f;
+  --dang-soft: #3e2027;
+  --dang-soft-line: #63323c;
+  --dang-text: #ff9aa4;
+  --dang-text-bright: #ffb3ba;
+  --dang-strong: #4a2530;
+  --dang-strong-line: #6f3541;
+  /* 危险按钮 hover：原型 .w-btn.dgr 只给了静态一套，hover 需比它亮一档，在此命名 */
+  --dang-strong-hover: #5a2c39;
+  --dang-strong-line-hover: #85414f;
+
+  --info: #5fb8e8;
+  --info-soft: #173245;
+  --info-soft-line: #265273;
+  --info-text: #8fd2f2;
+
+  --neu-soft: #2b3342;
+  --neu-soft-line: #3a4558;
+  --neu-text: #a8b5c9;
+
+  /* ---------- 控件交互态 ----------
+     这三档此前没有 Token，组件里就出现了「借相邻表面的线色当 hover 背景」的挪用，
+     同一个「控件 hover 边框」角色还漂出了 #4a566c / #45516a 两个值。
+     按「用途-状态」命名，不按色相命名：换主题时改的是角色，不是颜色。 */
+  --ctl-hover: #333c4d; /* 次级按钮 hover 背景 */
+  --ctl-hover-soft: #232b38; /* 贴在输入框上的幽灵按钮 hover（密码显隐切换） */
+  --ctl-hover-line: #4a566c; /* 控件 hover 边框：按钮 / 输入框 / 步骤圆点共用 */
+  --ctl-active: #29313f; /* 次级按钮按下 */
+  --switch-off: #3b4559; /* 开关关闭轨道 */
+  --switch-on: var(--acc-strong); /* 开关开启轨道 */
+
+  /* ---------- 侧边栏 ---------- */
+  --sidebar-item-hover: #202836;
+  --sidebar-active-text: #cfe0ff;
+  --sidebar-badge: #3b4660;
+
+  /* ---------- 滚动条 ----------
+     滑块是一个独立部件，不是描边：它与 --line 数值相同纯属巧合，
+     角色不同（描边随表面走，滑块要能被看见又要克制）。
+     单列两个角色，将来想让滚动条更显眼或近乎隐形时只改这两行。 */
+  --scroll-thumb: #333d50;
+  --scroll-thumb-hover: #45516a;
+
+  /* ---------- macOS 红绿灯 ----------
+     这是操作系统窗口的固定色，不随主题走，也**不能**并入 --dang/--warn/--ok：
+     那三个是「业务状态」语义（发送失败 / 待确认 / 已成功），这里是窗口控件。 */
+  --light-close: #ff5f57;
+  --light-min: #febc2e;
+  --light-max: #28c840;
+
+  /* ---------- 布局 ---------- */
+  --sidebar-w: 186px;
+  --sidebar-w-collapsed: 56px;
+  --window-min-w: 1024px;
+  --window-min-h: 680px;
+  --window-default-w: 1200px;
+  --window-default-h: 800px;
+  --titlebar-h: 38px;
+
+  /* ---------- 阴影 ---------- */
+  --shadow-window: 0 18px 50px #00000055;
+  --shadow-modal: 0 20px 50px #0008;
+
+  /* ---------- 动效（克制）---------- */
+  --ease: cubic-bezier(0.2, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

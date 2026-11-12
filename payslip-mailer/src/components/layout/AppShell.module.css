@@ -1,0 +1,152 @@
+/* ============================================================
+   薪邮 · 应用骨架（标题栏 / 侧边栏 / 内容区）
+   对应原型 S03 工作台：侧边栏 186px，可折叠 56px
+   ============================================================ */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-window);
+}
+
+/* ---------------- 主体 ---------------- */
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ---------------- 侧边栏 ---------------- */
+.sidebar {
+  width: var(--sidebar-w);
+  flex: none;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--line-sidebar);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transition: width var(--dur) var(--ease);
+}
+.sidebarCollapsed {
+  width: var(--sidebar-w-collapsed);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 8px 16px;
+  font-size: var(--fs-section);
+  font-weight: 600;
+  color: var(--tx);
+}
+.logo {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 7px;
+  background: var(--acc);
+  display: grid;
+  place-items: center;
+  color: var(--tx-on-accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.groupLabel {
+  font-size: 10px;
+  color: var(--tx-dimmer);
+  letter-spacing: 0.12em;
+  padding: 10px 10px 5px;
+  text-transform: uppercase;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+  padding: 7px 10px;
+  border-radius: 7px;
+  margin: 1px 0;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+}
+.item:hover {
+  background: var(--sidebar-item-hover);
+  color: var(--tx);
+}
+.itemActive {
+  background: var(--acc-soft);
+  color: var(--sidebar-active-text);
+  font-weight: 550;
+}
+.itemIcon {
+  width: 14px;
+  flex: none;
+  text-align: center;
+  font-size: var(--fs-body);
+  opacity: 0.85;
+}
+.itemLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.itemBadge {
+  margin-left: auto;
+  font-size: 10px;
+  background: var(--sidebar-badge);
+  color: var(--tx-body);
+  border-radius: 9px;
+  padding: 0 6px;
+}
+
+.sidebarFoot {
+  margin-top: auto;
+  padding: var(--sp-3) 8px 0;
+  border-top: 1px solid var(--line-sidebar);
+  font-size: var(--fs-hint);
+  color: var(--tx-dimmer);
+  line-height: 1.6;
+}
+
+/* ---------------- 内容区 ---------------- */
+.pane {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-window);
+  padding: var(--sp-4) var(--gutter);
+  overflow-y: auto;
+  position: relative;
+}
+
+.paneHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--sp-4);
+  flex-wrap: wrap;
+}
+.paneTitle {
+  font-size: var(--fs-title);
+  color: var(--tx);
+  font-weight: 600;
+  margin: 0;
+}
+.paneSub {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+.paneSpacer {
+  flex: 1;
+}

@@ -1,0 +1,341 @@
+/* ============================================================
+   S05 · 邮件组与成员（TC-201）
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: var(--sp-4);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hint {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.7;
+  margin-bottom: var(--sp-3);
+}
+
+.empty {
+  font-size: var(--fs-body);
+  color: var(--tx-faint);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  padding: var(--sp-4);
+  line-height: 1.8;
+}
+
+/* ---------------- 组列表 ---------------- */
+
+.groupList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.groupItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-2);
+  border-radius: var(--r-control);
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+}
+
+.groupItem:hover {
+  background: var(--bg-row-hover);
+}
+
+.groupName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupCount {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  font-variant-numeric: tabular-nums;
+  background: var(--bg-well);
+  border-radius: var(--r-pill);
+  padding: 0 7px;
+}
+
+.groupDel {
+  background: none;
+  border: 0;
+  color: var(--tx-dimmer);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 3px;
+}
+
+.groupDel:hover {
+  color: var(--dang-text);
+}
+
+/* ---------------- 成员表格 ---------------- */
+
+.table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  overflow: hidden;
+}
+
+.head,
+.row {
+  display: grid;
+  grid-template-columns: 28px minmax(72px, 1fr) minmax(150px, 1.6fr) 62px minmax(90px, 1.1fr) 66px 116px;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.head {
+  background: var(--bg-sunken);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.row {
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+/* 停用的人：整行淡下来，但仍然看得见 */
+.rowOff {
+  opacity: 0.5;
+}
+
+.colPick {
+  display: flex;
+  justify-content: center;
+}
+
+.colName {
+  color: var(--tx-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colEmail {
+  font-size: var(--fs-hint);
+  color: var(--tx-muted);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colNo {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.colGroups {
+  font-size: var(--fs-hint);
+  color: var(--tx-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colState {
+  justify-self: start;
+}
+
+.colOps {
+  display: flex;
+  gap: 2px;
+  justify-self: end;
+}
+
+/* ---------------- 弹窗 ---------------- */
+
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.pickGroups {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+}
+
+.pickTitle {
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  margin-bottom: var(--sp-2);
+}
+
+.pickEmpty {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+.pickList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+}
+
+.pickItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+}
+
+.clearGroups {
+  margin-top: var(--sp-2);
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--fs-hint);
+  color: var(--acc-text);
+  cursor: pointer;
+}
+
+.clearGroups:hover {
+  text-decoration: underline;
+}
+
+.activeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.activeText {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+}
+
+.note {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.8;
+}
+
+.note b {
+  color: var(--tx-secondary);
+  font-weight: 600;
+}
+
+/* ---------------- 批量粘贴 ---------------- */
+
+.pasteArea {
+  width: 100%;
+  padding: var(--sp-3);
+  border-radius: var(--r-control);
+  border: 1px solid var(--line-input);
+  background: var(--bg-input);
+  color: var(--tx-strong);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+}
+
+.pasteArea:focus {
+  border-color: var(--line-focus);
+}
+
+.previewBox {
+  background: var(--bg-sunken);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+}
+
+.previewHead {
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  margin-bottom: var(--sp-2);
+}
+
+.previewHead b {
+  color: var(--tx-strong);
+  font-weight: 600;
+}
+
+.problemList {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: var(--sp-2);
+}
+
+.problem {
+  font-size: var(--fs-hint);
+  color: var(--warn-text);
+  line-height: 1.6;
+}
+
+.acceptList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.acceptItem {
+  font-size: var(--fs-hint);
+  color: var(--tx-muted);
+  font-family: var(--font-mono);
+}
+
+/* ---------------- 反馈 ---------------- */
+
+.notice {
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--ok-text);
+  margin-top: var(--sp-3);
+}
+
+.error {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  line-height: 1.7;
+  margin-top: var(--sp-3);
+}

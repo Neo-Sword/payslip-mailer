@@ -1,0 +1,43 @@
+/* ============================================================
+   App 外壳级样式（启动中 / 出错 / 工作台内的少量排版）
+   ============================================================ */
+
+.boot {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  background: var(--bg-window);
+  color: var(--tx-muted);
+  font-size: var(--fs-body);
+}
+
+.fatal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+
+.fatalTitle {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  color: var(--tx);
+}
+
+.fatalText {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  line-height: 1.75;
+}
+
+.placeholderText {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  line-height: 1.8;
+}
+
+.selfCheck {
+  margin-top: var(--sp-3);
+  display: flex;
+  gap: var(--sp-2);
+}

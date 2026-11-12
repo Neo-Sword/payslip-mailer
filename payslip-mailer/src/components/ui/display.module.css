@@ -1,0 +1,277 @@
+/* ============================================================
+   薪邮 · 展示型基元：Card / Chip / Table / Progress / Steps / Stat
+   ============================================================ */
+
+/* ---------------- Card ---------------- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: var(--sp-4) var(--sp-5);
+  margin-bottom: var(--sp-3);
+}
+.cardFlush {
+  padding: 0;
+  overflow: hidden;
+}
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: 10px;
+  font-size: var(--fs-section);
+  font-weight: 600;
+  color: var(--tx-strong);
+}
+.cardHeaderSpacer {
+  flex: 1;
+}
+.cardMeta {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  font-weight: 400;
+}
+.cardFlush .cardHeader {
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  margin-bottom: 0;
+}
+
+/* 强调卡：用于「数据仅存本机」这类信任声明 */
+.cardAcc {
+  background: var(--acc-card);
+  border-color: var(--acc-soft-line);
+}
+.cardAcc .cardHeader {
+  color: var(--acc-text);
+}
+.cardWarn {
+  background: var(--warn-strong);
+  border-color: var(--warn-soft-line);
+}
+.cardDang {
+  background: var(--dang-soft);
+  border-color: var(--dang-strong-line);
+}
+.cardOk {
+  background: var(--ok-strong);
+  border-color: var(--ok-soft-line);
+}
+
+/* ---------------- Chip（状态标签）---------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--neu-soft-line);
+  background: var(--neu-soft);
+  color: var(--neu-text);
+  font-size: 10.5px;
+  line-height: 1.5;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.chipOk {
+  background: var(--ok-soft);
+  border-color: var(--ok-soft-line);
+  color: var(--ok-text);
+}
+.chipWarn {
+  background: var(--warn-soft);
+  border-color: var(--warn-soft-line);
+  color: var(--warn-text);
+}
+.chipDang {
+  background: var(--dang-soft);
+  border-color: var(--dang-soft-line);
+  color: var(--dang-text);
+}
+.chipInfo {
+  background: var(--info-soft);
+  border-color: var(--info-soft-line);
+  color: var(--info-text);
+}
+.chipAcc {
+  background: var(--acc-soft);
+  border-color: var(--acc-soft-line);
+  color: var(--acc-text);
+}
+
+/* ---------------- Table ---------------- */
+.tableWrap {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-table);
+}
+.table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--tx-faint);
+  padding: var(--sp-2) 10px;
+  background: var(--bg-well);
+  border-bottom: 1px solid var(--line-table-head);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.table td {
+  padding: var(--sp-2) 10px;
+  border-bottom: 1px solid var(--line-row);
+  color: var(--tx-body);
+  white-space: nowrap;
+}
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.table tbody tr:hover td {
+  background: var(--bg-row-hover);
+}
+.table .selected td {
+  background: var(--bg-selected);
+}
+.table .strong {
+  color: var(--tx);
+  font-weight: 550;
+}
+.tableFooter {
+  padding: 10px var(--sp-3);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  border-top: 1px solid var(--line-row);
+}
+
+/* ---------------- Progress ---------------- */
+.progress {
+  height: 7px;
+  background: var(--bg-sunken);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+}
+.progressBar {
+  display: block;
+  height: 100%;
+  background: var(--acc-stronger);
+  border-radius: var(--r-pill);
+  transition: width var(--dur) var(--ease);
+}
+.progressOk .progressBar {
+  background: var(--ok);
+}
+.progressWarn .progressBar {
+  background: var(--warn);
+}
+.progressDang .progressBar {
+  background: var(--dang);
+}
+
+/* ---------------- Steps（步骤条）---------------- */
+.steps {
+  display: flex;
+  align-items: center;
+  margin: 6px 0 var(--sp-4);
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  flex: 1;
+  white-space: nowrap;
+}
+.stepCircle {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10.5px;
+  border: 1px solid var(--ctl-hover-line);
+  background: var(--bg-well);
+}
+.stepActive {
+  color: var(--tx);
+}
+.stepActive .stepCircle {
+  background: var(--acc-strong);
+  border-color: var(--acc);
+  color: var(--tx-on-accent);
+}
+.stepDone .stepCircle {
+  background: var(--ok-strong);
+  border-color: var(--ok);
+  color: var(--ok-text-bright);
+}
+.stepLine {
+  height: 1px;
+  background: var(--neu-soft-line);
+  flex: 1;
+  margin: 0 var(--sp-2);
+}
+
+/* ---------------- Stat（指标块）---------------- */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: var(--sp-3);
+}
+.stat {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 11px var(--sp-3);
+}
+.statValue {
+  font-size: 19px;
+  font-weight: 620;
+  color: var(--tx);
+  line-height: 1.2;
+}
+.statAcc {
+  color: var(--acc-text-bright);
+}
+.statOk {
+  color: var(--ok-text-bright);
+}
+.statWarn {
+  color: var(--warn-text-bright);
+}
+.statLabel {
+  font-size: 10.5px;
+  color: var(--tx-faint);
+  margin-top: 3px;
+}
+
+/* ---------------- Empty（空状态）---------------- */
+.empty {
+  text-align: center;
+  padding: 36px var(--sp-4);
+  color: var(--tx-faint);
+  font-size: var(--fs-body);
+}
+.emptyIcon {
+  font-size: 24px;
+  display: block;
+  margin-bottom: var(--sp-2);
+  opacity: 0.6;
+}
+.emptyHint {
+  font-size: var(--fs-hint);
+  color: var(--tx-dimmer);
+  margin-top: 4px;
+}
+
+/* ---------------- Divider ---------------- */
+.divider {
+  height: 1px;
+  background: var(--line-soft);
+  margin: var(--sp-3) 0;
+}

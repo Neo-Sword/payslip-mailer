@@ -1,0 +1,103 @@
+/* ============================================================
+   KEYCHAIN_MISSING 引导 · 两条分支都能点
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--acc);
+  color: var(--tx-on-accent);
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: var(--sp-4);
+}
+
+.title {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: var(--sp-2);
+}
+
+.lead {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  line-height: 1.75;
+  margin-bottom: var(--sp-4);
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.cardTitle {
+  font-size: var(--fs-section);
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: var(--sp-2);
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.list li {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  line-height: 1.75;
+  margin-bottom: 3px;
+}
+
+.path {
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.8;
+}
+
+.path code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-hint);
+  color: var(--tx-secondary);
+  word-break: break-all;
+}
+
+.message {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  line-height: 1.7;
+  margin-bottom: var(--sp-4);
+}
+
+.actions {
+  display: flex;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+
+.foot {
+  font-size: var(--fs-hint);
+  color: var(--tx-dimmer);
+  line-height: 1.7;
+}

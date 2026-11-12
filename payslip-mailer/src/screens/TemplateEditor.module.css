@@ -1,0 +1,240 @@
+/* ============================================================
+   S10 · 中文邮件模板编辑器（TC-202）
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.listCard {
+  width: 100%;
+}
+
+.templateList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.templateItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-control);
+  border: 1px solid var(--line-soft);
+  background: var(--bg-sunken);
+  color: var(--tx-secondary);
+  font-family: inherit;
+  font-size: var(--fs-body);
+  cursor: pointer;
+}
+
+.templateItem:hover {
+  background: var(--bg-row-hover);
+}
+
+.templateItemOn {
+  border-color: var(--acc-soft-line);
+  background: var(--acc-soft);
+  color: var(--tx-strong);
+}
+
+.editor {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(320px, 0.9fr);
+  gap: var(--sp-4);
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .editor {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------- 编辑区 ---------------- */
+
+.editCard {
+  min-width: 0;
+}
+
+.bodyArea {
+  width: 100%;
+  padding: var(--sp-3);
+  border-radius: var(--r-control);
+  border: 1px solid var(--line-input);
+  background: var(--bg-input);
+  color: var(--tx-strong);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+}
+
+.bodyArea:focus {
+  border-color: var(--line-focus);
+}
+
+/* ---------------- 变量面板 ---------------- */
+
+.varPanel {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--line-soft);
+}
+
+.varTitle {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  margin-bottom: var(--sp-2);
+}
+
+.varList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.varChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-soft);
+  background: var(--bg-well);
+  color: var(--tx-secondary);
+  font-family: inherit;
+  font-size: var(--fs-hint);
+  cursor: pointer;
+}
+
+.varChip:hover {
+  border-color: var(--acc-soft-line);
+  color: var(--tx-strong);
+}
+
+.varRequired {
+  font-size: 10px;
+  color: var(--warn-text);
+}
+
+/* ---------------- 预览 ---------------- */
+
+.previewCard {
+  min-width: 0;
+}
+
+.previewNote {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  margin-bottom: var(--sp-3);
+}
+
+.previewMeta {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.8;
+  margin-bottom: var(--sp-2);
+}
+
+.previewSubject {
+  font-size: var(--fs-body);
+  color: var(--tx-strong);
+  font-weight: 600;
+  padding-bottom: var(--sp-2);
+  margin-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.previewFrame {
+  width: 100%;
+  height: 420px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  background: #ffffff; /* no-token: 邮件预览要显示收件人看到的样子 —— 那是白纸 */
+}
+
+.textFallback {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+.textFallback summary {
+  cursor: pointer;
+}
+
+.textBody {
+  margin-top: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--r-control);
+  background: var(--bg-sunken);
+  color: var(--tx-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-hint);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.okLine {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-hint);
+  color: var(--ok-text);
+}
+
+.emptyPreview {
+  font-size: var(--fs-body);
+  color: var(--tx-faint);
+  padding: var(--sp-4);
+  background: var(--bg-sunken);
+  border-radius: var(--r-control);
+}
+
+/* ---------------- 反馈 ---------------- */
+
+.problemBox {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.problemTitle {
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  margin-bottom: var(--sp-1);
+}
+
+.problemItem {
+  font-size: var(--fs-hint);
+  color: var(--dang-text);
+  line-height: 1.7;
+}
+
+.notice {
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--ok-text);
+  margin-top: var(--sp-3);
+}
+
+.error {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  line-height: 1.7;
+  margin-top: var(--sp-3);
+}

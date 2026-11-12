@@ -1,0 +1,24 @@
+/* ============================================================
+   居中舞台（S01 / S02 / 引导屏）
+   ============================================================ */
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-window);
+}
+
+.centerPane {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  background: var(--bg-window);
+  overflow-y: auto;
+  padding: var(--sp-6) var(--gutter);
+}
+
+.centerBox {
+  width: 400px;
+}

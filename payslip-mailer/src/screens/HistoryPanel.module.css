@@ -1,0 +1,38 @@
+/* ============================================================
+   S13 · 发送历史（TC-403 · ADR-0026）
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.note {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+  line-height: var(--lh-body);
+  padding: 0 var(--sp-3);
+}
+
+.failed {
+  color: var(--dang-text);
+}
+
+.notice {
+  font-size: var(--fs-body);
+  color: var(--ok-text);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.error {
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+}

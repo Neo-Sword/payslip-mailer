@@ -1,0 +1,245 @@
+/* ============================================================
+   S01 · 首次启动向导
+   无侧栏，内容居中；文案逐字取自设计文档 ch.12 S01
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--acc);
+  color: var(--tx-on-accent);
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: var(--sp-4);
+}
+
+.title {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: 2px;
+}
+
+.sub {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  margin-bottom: var(--sp-5);
+}
+
+.stepsBox {
+  margin-bottom: var(--sp-5);
+}
+
+/* ---------------- 分节 ---------------- */
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+/* 不在当前步时移出视野但**留在 DOM 里**：
+   口令与邮箱因此能跨步保留，又不用进 React state。 */
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-1);
+}
+
+.sectionNo {
+  font-size: var(--fs-section);
+  color: var(--acc-text);
+  flex: none;
+  line-height: 1.5;
+}
+
+.sectionTitle {
+  font-size: var(--fs-section);
+  font-weight: 600;
+  color: var(--tx);
+}
+
+.sectionSub {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+/* ---------------- 强度条 ---------------- */
+
+.strength {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: -4px;
+}
+
+.strength i {
+  width: 44px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--neu-soft);
+  display: block;
+}
+
+.strength i.strengthOn {
+  background: var(--acc-stronger);
+}
+
+.strengthText {
+  margin-left: var(--sp-2);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+/* ---------------- 信息卡 ---------------- */
+
+.infoCard {
+  background: var(--bg-card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.infoTitle {
+  font-size: var(--fs-section);
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: var(--sp-2);
+}
+
+.infoText {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  line-height: 1.75;
+}
+
+.checkList {
+  list-style: none;
+  padding: 0;
+  margin: var(--sp-3) 0 0;
+  display: grid;
+  gap: 5px;
+}
+
+.checkList li {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+  padding-left: 20px;
+  position: relative;
+}
+
+.checkList li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--ok-text);
+  font-weight: 600;
+}
+
+.dataDir {
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+.dataDir code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-hint);
+  color: var(--tx-secondary);
+  word-break: break-all;
+}
+
+/* ---------------- 提示与报错 ---------------- */
+
+.notice {
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-soft-line);
+  border-radius: var(--r-card);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+  font-size: var(--fs-body);
+  color: var(--warn-text);
+  line-height: 1.75;
+}
+
+.notice b {
+  color: var(--warn-text-bright);
+  font-weight: 600;
+}
+
+.notice code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+}
+
+.formError {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+}
+
+.previewNote {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+.finePrint {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.7;
+  margin-top: var(--sp-1);
+}
+
+/* ---------------- 页脚 ---------------- */
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--line-soft);
+}
+
+.footLeft {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+.footSpacer {
+  flex: 1;
+}
+
+.version {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-hint);
+  color: var(--tx-dimmer);
+  text-align: center;
+}

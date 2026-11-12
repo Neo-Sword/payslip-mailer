@@ -1,0 +1,62 @@
+/* ============================================================
+   S14 · 邮件配置（TC-500 · ADR-0027）
+   ============================================================ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.grid > :global(*) {
+  min-width: 0;
+}
+
+.notice {
+  font-size: var(--fs-body);
+  color: var(--ok-text);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.error {
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.testBox {
+  font-size: var(--fs-body);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+  background: var(--bg-well);
+}
+
+.ok {
+  color: var(--ok-text);
+}
+
+.bad {
+  color: var(--dang-text);
+}
+
+.warn {
+  color: var(--warn-text);
+}
+
+.note {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: var(--lh-body);
+  margin: 0;
+}

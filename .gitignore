@@ -1,0 +1,49 @@
+# ---------- 依赖与构建产物 ----------
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# ---------- 编辑器与系统 ----------
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# ---------- 密钥与凭据（绝不入库）----------
+.env
+.env.*
+!.env.example
+*.p12
+*.cer
+*.mobileprovision
+*.key
+*.pem
+secrets/
+**/secrets/
+
+# ---------- 员工名单等敏感种子数据（绝不入库）----------
+# 成员工名单、真实工资数据含个人信息，只允许留在本机
+members*.csv
+members*.xlsx
+members*.json
+roster*.csv
+roster*.xlsx
+payroll*.xlsx
+salary-data/
+seed/real/
+**/seed/real/
+
+# ---------- 本地运行产物 ----------
+*.log
+logs/
+.DS_Store
+
+# ---------- 工具的会话记忆（不入库）----------
+.workbuddy-ai/

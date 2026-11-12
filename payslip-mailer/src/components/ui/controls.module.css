@@ -1,0 +1,262 @@
+/* ============================================================
+   薪邮 · 控件基元：Button / Input / Select / Switch / Checkbox
+   规范来源：设计文档 ch.11 组件规范
+   ============================================================ */
+
+/* ---------------- Button ---------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--line-input);
+  background: var(--bg-raised);
+  color: var(--tx-body);
+  font-family: inherit;
+  font-size: var(--fs-hint);
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+.btn:hover:not(:disabled) {
+  background: var(--ctl-hover);
+  border-color: var(--ctl-hover-line);
+}
+.btn:active:not(:disabled) {
+  background: var(--ctl-active);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 主按钮：每屏至多 1 个 */
+.btnPri {
+  background: var(--acc-strong);
+  border-color: var(--acc-stronger);
+  color: var(--tx-on-accent);
+  font-weight: 550;
+}
+.btnPri:hover:not(:disabled) {
+  background: var(--acc-stronger);
+  border-color: var(--acc-stronger-line);
+}
+.btnPri:active:not(:disabled) {
+  background: var(--acc-strong-active);
+}
+
+/* 幽灵按钮 */
+.btnGhost {
+  background: transparent;
+}
+.btnGhost:hover:not(:disabled) {
+  background: var(--bg-raised);
+}
+
+/* 危险按钮：必须配合二次确认 */
+.btnDgr {
+  background: var(--dang-strong);
+  border-color: var(--dang-strong-line);
+  color: var(--dang-text-bright);
+}
+.btnDgr:hover:not(:disabled) {
+  background: var(--dang-strong-hover);
+  border-color: var(--dang-strong-line-hover);
+}
+
+.btnSm {
+  padding: 3px 8px;
+  font-size: var(--fs-hint);
+}
+
+.btnBlock {
+  width: 100%;
+  justify-content: center;
+}
+
+/* 加载中 */
+.btnSpinner {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------- Field（标签 + 控件 + 错误）---------------- */
+.field {
+  margin-bottom: var(--sp-3);
+}
+.field:last-child {
+  margin-bottom: 0;
+}
+.label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: var(--fs-hint);
+  color: var(--tx-hint);
+}
+.required {
+  color: var(--dang-text);
+  margin-left: 2px;
+}
+.hint {
+  margin-top: 6px;
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.6;
+}
+.errorText {
+  margin-top: 6px;
+  font-size: var(--fs-hint);
+  color: var(--dang-text);
+  line-height: 1.6;
+}
+
+/* ---------------- Input ---------------- */
+.input,
+.select {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--line-input);
+  background: var(--bg-input);
+  color: var(--tx-strong);
+  font-family: inherit;
+  font-size: var(--fs-body);
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.input::placeholder {
+  color: var(--tx-dimmer);
+}
+.input:hover:not(:disabled),
+.select:hover:not(:disabled) {
+  border-color: var(--ctl-hover-line);
+}
+.input:focus,
+.select:focus {
+  border-color: var(--line-focus);
+}
+.input:disabled,
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.inputReadonly {
+  background: var(--bg-sunken);
+  color: var(--tx-faint);
+}
+.inputError {
+  border-color: var(--line-danger);
+}
+.inputError:focus {
+  border-color: var(--line-danger);
+}
+
+.select {
+  appearance: none;
+  padding-right: 26px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--tx-faint) 50%),
+    linear-gradient(135deg, var(--tx-faint) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 52%, calc(100% - 10px) 52%;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+/* 密码框：内置显隐切换 */
+.inputWrap {
+  position: relative;
+  display: flex;
+}
+.inputWrap .input {
+  padding-right: 46px;
+}
+.revealBtn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--tx-faint);
+  font-size: var(--fs-hint);
+  font-family: inherit;
+  padding: 4px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.revealBtn:hover {
+  color: var(--tx-body);
+  background: var(--ctl-hover-soft);
+}
+
+/* ---------------- Switch ---------------- */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+  flex: none;
+  border-radius: var(--r-pill);
+  background: var(--switch-off);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+  border: 0;
+  padding: 0;
+}
+.switch i {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--tx-body);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.switchOn {
+  background: var(--switch-on);
+}
+.switchOn i {
+  transform: translateX(13px);
+  background: var(--tx-on-accent);
+}
+.switch:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------------- Checkbox ---------------- */
+.checkbox {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--acc-strong);
+  cursor: pointer;
+}
+.checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ---------------- Row：多控件一行 ---------------- */
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.rowFill > * {
+  flex: 1;
+  min-width: 120px;
+}

@@ -1,0 +1,204 @@
+/* ============================================================
+   S07 · 月度工资表（TC-303 · ADR-0022）
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.meta {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+}
+
+.meta b {
+  color: var(--tx);
+}
+
+.warnText {
+  color: var(--warn-text);
+}
+
+.busy {
+  margin-left: var(--sp-3);
+  color: var(--tx-faint);
+  font-size: var(--fs-hint);
+}
+
+.tableBox {
+  overflow: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  background: var(--bg-card);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-table);
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-raised);
+  color: var(--tx-secondary);
+  font-weight: 600;
+  text-align: left;
+  padding: var(--sp-2);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.table td {
+  padding: var(--sp-1) var(--sp-2);
+  border-bottom: 1px solid var(--line-row);
+  color: var(--tx-body);
+  white-space: nowrap;
+  height: var(--row-h-compact);
+}
+
+.numericHead {
+  text-align: right;
+}
+
+.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.req {
+  color: var(--dang-text);
+  margin-left: 2px;
+}
+
+.formulaTag {
+  font-size: var(--fs-hint);
+  color: var(--acc-text);
+  border: 1px solid var(--acc-soft-line);
+  border-radius: var(--r-pill);
+  padding: 0 6px;
+  margin-left: 6px;
+}
+
+.stickyCol {
+  position: sticky;
+  left: 0;
+  background: var(--bg-card);
+  z-index: 2;
+}
+
+.table th.stickyCol {
+  background: var(--bg-raised);
+  z-index: 3;
+}
+
+.emailCell {
+  color: var(--tx-secondary);
+}
+
+.absent {
+  color: var(--tx-dimmer);
+}
+
+.rowProblem td {
+  background: var(--warn-soft);
+}
+
+.cellButton {
+  appearance: none;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: text;
+  padding: 2px 6px;
+  border-radius: var(--r-control);
+  text-align: right;
+  width: 100%;
+}
+
+.cellButton:hover {
+  background: var(--bg-row-hover);
+  outline: 1px solid var(--ctl-hover-line);
+}
+
+.cellInput {
+  width: 110px;
+  text-align: right;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--tx);
+  background: var(--bg-input);
+  border: 1px solid var(--line-focus);
+  border-radius: var(--r-control);
+  padding: 2px 6px;
+}
+
+.cellInput:focus-visible {
+  outline: none;
+}
+
+.deleteBtn {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  color: var(--tx-secondary);
+  font-size: var(--fs-hint);
+  cursor: pointer;
+  padding: 1px 8px;
+}
+
+.deleteBtn:hover {
+  color: var(--dang-text);
+  border-color: var(--dang-soft-line);
+  background: var(--dang-soft);
+}
+
+.totalsRow td {
+  background: var(--bg-raised);
+  font-weight: 600;
+  color: var(--tx-strong);
+  border-top: 1px solid var(--line);
+  border-bottom: none;
+}
+
+.totalsBar {
+  display: flex;
+  gap: var(--sp-6);
+  align-items: baseline;
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+}
+
+.totalsBar b {
+  color: var(--tx);
+  font-variant-numeric: tabular-nums;
+  margin-left: 4px;
+}
+
+.totalsHint {
+  margin-left: auto;
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+.error {
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.emptyCard {
+  background: var(--bg-card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  padding: var(--sp-6);
+}

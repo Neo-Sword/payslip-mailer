@@ -1,0 +1,18 @@
+# ============================================================
+# 本项目的 cargo 构建配置（仅作用于本项目，不影响其他工程）
+# ============================================================
+
+# 本机 /Library/Developer/CommandLineTools/SDKs/ 下除了 CLT 自带的 MacOSX26.5.sdk，
+# 还多装了一个 MacOSX27.0.sdk。xcrun 会优先选中版本号更高的 27.0，
+# 而它的 libSystem.tbd 使用了 `arm64e.x1-macos` 这种新架构写法，
+# CLT 自带的链接器 ld-1267 不认识 —— 表现为任何链接都失败：
+#
+#   ld: tapi error: malformed file
+#   .../MacOSX27.0.sdk/usr/lib/libSystem.B.tbd:4:20: error: unknown architecture
+#
+# 这里把 SDKROOT 钉回 CLT 自带的 SDK（MacOSX.sdk -> MacOSX26.5.sdk）。
+# 不加 force，若外部已显式设置 SDKROOT 则以外部为准（例如装了完整 Xcode 的同事）。
+#
+# 若将来安装了完整 Xcode 并切换到它，删除本段即可。
+[env]
+SDKROOT = { value = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk" }

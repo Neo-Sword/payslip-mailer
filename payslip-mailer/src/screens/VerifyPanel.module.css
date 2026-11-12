@@ -1,0 +1,172 @@
+/* ============================================================
+   S11 · 预览与核对（TC-401 · ADR-0024）
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.periodRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.periodLabel {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+  white-space: nowrap;
+}
+
+.hint {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+.notice {
+  font-size: var(--fs-body);
+  color: var(--ok-text);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.error {
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.warn {
+  font-size: var(--fs-body);
+  color: var(--warn-text);
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+  line-height: 1.6;
+}
+
+/* ---- 左右分栏 ---- */
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: var(--sp-4);
+  align-items: start;
+}
+
+.listCard {
+  max-height: 560px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.item {
+  appearance: none;
+  background: none;
+  border: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid var(--line-row);
+  color: var(--tx-body);
+  font-size: var(--fs-body);
+}
+
+.item:hover {
+  background: var(--bg-row-hover);
+}
+
+.itemActive {
+  background: var(--bg-selected);
+}
+
+.itemName {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemEmail {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+/* ---- 预览 ---- */
+
+.previewCard {
+  min-height: 420px;
+}
+
+.placeholder {
+  color: var(--tx-faint);
+  font-size: var(--fs-body);
+  padding: var(--sp-6);
+  text-align: center;
+  line-height: 1.8;
+}
+
+.subject {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: baseline;
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  margin-bottom: var(--sp-3);
+}
+
+.subjectLabel {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  white-space: nowrap;
+}
+
+.progressLine {
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+}
+
+.progressLine b {
+  color: var(--tx);
+  font-variant-numeric: tabular-nums;
+}
+
+.warnText {
+  color: var(--warn-text);
+}
+
+.htmlBox {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  background: #ffffff; /* no-token: 邮件正文发给收件人就是浅色 HTML —— 白底看真实观感，不属于应用主题 */
+  overflow: hidden;
+}
+
+/* 邮件正文是发给收件人的 —— 用白底看真实观感（ch.11：金额右对齐、PingFang SC） */
+.htmlFrame {
+  width: 100%;
+  height: 420px;
+  border: none;
+  background: #ffffff; /* no-token: 同上 —— 邮件正文的真实观感，与应用深色主题无关 */
+}

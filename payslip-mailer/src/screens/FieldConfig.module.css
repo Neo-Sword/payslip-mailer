@@ -1,0 +1,242 @@
+/* ============================================================
+   S04 · 工资条项目配置（TC-200）
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.hint {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  line-height: 1.8;
+  margin-bottom: var(--sp-3);
+}
+
+.hint b {
+  color: var(--tx-strong);
+  font-weight: 600;
+}
+
+.defaultNote {
+  background: var(--info-soft);
+  border: 1px solid var(--info-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-hint);
+  color: var(--info-text);
+  line-height: 1.8;
+  margin-bottom: var(--sp-3);
+}
+
+.defaultNote b {
+  color: var(--tx-strong);
+  font-weight: 600;
+}
+
+.empty {
+  font-size: var(--fs-body);
+  color: var(--tx-faint);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  padding: var(--sp-5);
+  line-height: 1.8;
+}
+
+/* ---------------- 字段表 ---------------- */
+
+.table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  overflow: hidden;
+}
+
+.head,
+.row {
+  display: grid;
+  grid-template-columns: 58px minmax(90px, 1.2fr) minmax(110px, 1.4fr) 78px 56px 64px minmax(120px, 1.6fr) 62px;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.head {
+  background: var(--bg-sunken);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.row {
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+/* 停用的字段：整行淡下来，但仍然看得见（用户才知道自己停用过什么） */
+.rowOff {
+  opacity: 0.45;
+}
+
+.colHandle {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.moveBtn {
+  background: none;
+  border: 0;
+  color: var(--tx-faint);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.moveBtn:hover:not(:disabled) {
+  color: var(--tx-strong);
+}
+
+.moveBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.colLabel {
+  color: var(--tx-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.colKey {
+  font-family: var(--font-mono);
+  font-size: var(--fs-hint);
+  color: var(--tx-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.colType {
+  justify-self: start;
+}
+
+.colBool {
+  font-size: var(--fs-hint);
+  color: var(--tx-muted);
+  text-align: center;
+}
+
+.colFormula {
+  font-family: var(--font-mono);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.colOps {
+  justify-self: end;
+}
+
+/* ---------------- 表头预览 ---------------- */
+
+.headerPreview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.headerCell {
+  font-size: var(--fs-hint);
+  color: var(--tx-body);
+  background: var(--bg-well);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  padding: 3px 9px;
+}
+
+/* ---------------- 弹窗 ---------------- */
+
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.requiredRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.requiredText {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+}
+
+.note {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.8;
+}
+
+.note b {
+  color: var(--tx-secondary);
+  font-weight: 600;
+}
+
+/* ---------------- 反馈 ---------------- */
+
+.notice {
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--ok-text);
+  margin-top: var(--sp-3);
+}
+
+.error {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  line-height: 1.7;
+  margin-top: var(--sp-3);
+}
+
+/* ---------------- 公式试算 ---------------- */
+
+.calcRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: calc(var(--sp-3) * -1);
+}
+
+.calcOk {
+  font-size: var(--fs-hint);
+  color: var(--ok-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.calcErr {
+  font-size: var(--fs-hint);
+  color: var(--dang-text);
+}

@@ -1,0 +1,104 @@
+/* ============================================================
+   S09 · 导出空模板（TC-301）
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.opts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+
+.opt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+}
+
+.previewTitle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  margin-bottom: var(--sp-2);
+}
+
+.previewHint {
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+}
+
+.cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.col {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--fs-hint);
+  color: var(--tx-body);
+  background: var(--bg-well);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  padding: 3px 9px;
+}
+
+.colRequired {
+  color: var(--dang-text);
+}
+
+.colFormula {
+  font-size: 10px;
+  color: var(--acc-text);
+}
+
+.note {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-hint);
+  color: var(--tx-faint);
+  line-height: 1.8;
+}
+
+.empty {
+  font-size: var(--fs-body);
+  color: var(--tx-faint);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+  padding: var(--sp-4);
+  line-height: 1.8;
+}
+
+.notice {
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--ok-text);
+  margin-top: var(--sp-3);
+}
+
+.error {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  line-height: 1.7;
+  margin-top: var(--sp-3);
+}

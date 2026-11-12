@@ -1,0 +1,145 @@
+/* ============================================================
+   薪邮 · 浮层：Modal / ConfirmDialog / Toast
+   危险操作必须红色 + 二次确认（必要时输入密码）
+   ============================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  display: grid;
+  place-items: center;
+  padding: var(--sp-5);
+  z-index: 100;
+}
+
+.modal {
+  width: min(430px, 94%);
+  background: var(--bg-modal);
+  border: 1px solid var(--line-modal);
+  border-radius: var(--r-window);
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalWide {
+  width: min(720px, 94%);
+}
+
+.modalHead {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 13px var(--sp-4);
+  border-bottom: 1px solid var(--line-modal-foot);
+  font-size: var(--fs-section);
+  font-weight: 600;
+  color: var(--tx);
+}
+
+.modalBody {
+  padding: var(--sp-4);
+  overflow-y: auto;
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  line-height: 1.7;
+}
+
+.modalFoot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--line-modal-foot);
+  background: var(--bg-modal-foot);
+}
+
+.modalClose {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--tx-faint);
+  font-size: var(--fs-hint);
+  font-family: inherit;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.modalClose:hover {
+  color: var(--tx-body);
+  background: var(--bg-raised);
+}
+
+/* 确认文案：发生了什么 + 影响范围 + 下一步 */
+.confirmText {
+  margin: 0 0 var(--sp-3);
+  color: var(--tx-muted);
+}
+
+/* ---------------- Toast ---------------- */
+.toastHost {
+  position: fixed;
+  /* 让开标题栏，避免盖住「无遥测 · 本机数据」这类常驻状态标识 */
+  top: calc(var(--titlebar-h) + 10px);
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  z-index: 200;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 220px;
+  max-width: 380px;
+  padding: 10px var(--sp-3);
+  border-radius: var(--r-control);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-modal);
+  font-size: var(--fs-body);
+  color: var(--tx);
+}
+
+.toastOk {
+  border-color: var(--ok-soft-line);
+  background: var(--ok-soft);
+}
+.toastWarn {
+  border-color: var(--warn-soft-line);
+  background: var(--warn-strong);
+}
+.toastDang {
+  border-color: var(--dang-strong-line);
+  background: var(--dang-soft);
+}
+.toastInfo {
+  border-color: var(--info-soft-line);
+  background: var(--info-soft);
+}
+
+.toastText {
+  flex: 1;
+  min-width: 0;
+}
+.toastAction {
+  border: 0;
+  background: transparent;
+  color: var(--acc-text);
+  font-family: inherit;
+  font-size: var(--fs-hint);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.toastAction:hover {
+  background: var(--bg-raised);
+}

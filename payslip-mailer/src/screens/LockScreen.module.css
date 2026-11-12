@@ -1,0 +1,169 @@
+/* ============================================================
+   S02 · 登录 / 解锁
+   居中卡片；文案逐字取自设计文档 ch.12 S02
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+}
+
+.badgeRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--sp-3);
+}
+
+.badge {
+  font-size: var(--fs-hint);
+  color: var(--warn-text);
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-soft-line);
+  border-radius: var(--r-pill);
+  padding: 1px 9px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--acc);
+  color: var(--tx-on-accent);
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: var(--sp-4);
+}
+
+.title {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: 2px;
+}
+
+.email {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  margin-bottom: var(--sp-5);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.error {
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  line-height: 1.7;
+}
+
+.remaining {
+  font-size: var(--fs-body);
+  color: var(--warn-text);
+}
+
+.countdown {
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.rememberRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.rememberText {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+}
+
+.forgot {
+  align-self: flex-start;
+  margin-top: var(--sp-3);
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--fs-body);
+  color: var(--acc-text);
+  cursor: pointer;
+}
+
+.forgot:hover {
+  color: var(--acc-text-bright);
+  text-decoration: underline;
+}
+
+.warn {
+  margin-top: var(--sp-5);
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--warn-text);
+  line-height: 1.7;
+}
+
+.foot {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-hint);
+  color: var(--tx-dimmer);
+  text-align: center;
+}
+
+/* ---------------- 忘记密码弹窗 ---------------- */
+
+.forgotBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.forgotLead {
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  line-height: 1.75;
+}
+
+.forgotLead b {
+  color: var(--tx-strong);
+  font-weight: 600;
+}
+
+.forgotText {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  line-height: 1.75;
+}
+
+.forgotList {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.forgotList li {
+  font-size: var(--fs-body);
+  color: var(--tx-muted);
+  line-height: 1.75;
+  margin-bottom: 4px;
+}
+
+.forgotFoot {
+  margin-top: var(--sp-4);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}

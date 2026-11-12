@@ -1,0 +1,209 @@
+/* ============================================================
+   S08 · Excel 导入向导（TC-302 · ADR-0021）
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.periodRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.periodLabel {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+  white-space: nowrap;
+}
+
+.note {
+  font-size: var(--fs-body);
+  color: var(--tx-secondary);
+  line-height: var(--lh-body);
+  margin: 0 0 var(--sp-2);
+}
+
+.warn {
+  font-size: var(--fs-body);
+  color: var(--warn-text);
+  line-height: var(--lh-body);
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+  margin: 0 0 var(--sp-2);
+}
+
+.error {
+  font-size: var(--fs-body);
+  color: var(--dang-text);
+  line-height: var(--lh-body);
+  background: var(--dang-soft);
+  border: 1px solid var(--dang-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+  margin: 0 0 var(--sp-2);
+}
+
+.notice {
+  font-size: var(--fs-body);
+  color: var(--ok-text);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft-line);
+  border-radius: var(--r-control);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+/* ---- 表头映射表 ---- */
+
+.mapTable {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-table);
+}
+
+.table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--tx-secondary);
+  border-bottom: 1px solid var(--line-table-head);
+  padding: var(--sp-1) var(--sp-2);
+  white-space: nowrap;
+}
+
+.table td {
+  border-bottom: 1px solid var(--line-row);
+  padding: var(--sp-1) var(--sp-2);
+  color: var(--tx-body);
+}
+
+.select {
+  font-size: var(--fs-table);
+  color: var(--tx-body);
+  background: var(--bg-input);
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-control);
+  padding: 3px 8px;
+  min-width: 200px;
+}
+
+.select:focus-visible {
+  outline: none;
+  border-color: var(--line-focus);
+}
+
+/* ---- 校验结果 ---- */
+
+.counts {
+  display: flex;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  border-radius: var(--r-control);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--line-soft);
+}
+
+.count b {
+  font-size: var(--fs-section);
+}
+
+.count span {
+  font-size: var(--fs-hint);
+}
+
+.count_ok {
+  color: var(--ok-text);
+  background: var(--ok-soft);
+  border-color: var(--ok-soft-line);
+}
+
+.count_warn {
+  color: var(--warn-text);
+  background: var(--warn-soft);
+  border-color: var(--warn-soft-line);
+}
+
+.count_danger {
+  color: var(--dang-text);
+  background: var(--dang-soft);
+  border-color: var(--dang-soft-line);
+}
+
+.problems {
+  list-style: none;
+  margin: 0 0 var(--sp-3);
+  padding: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-control);
+}
+
+.problems li {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: baseline;
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-table);
+  color: var(--tx-body);
+  border-bottom: 1px solid var(--line-row);
+  line-height: 1.5;
+}
+
+.problems li:last-child {
+  border-bottom: none;
+}
+
+.problemRow {
+  color: var(--tx-secondary);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.problemCol {
+  color: var(--tx-secondary);
+  white-space: nowrap;
+}
+
+/* ---- 导入策略 ---- */
+
+.strategies {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.strategy {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-body);
+  color: var(--tx-body);
+  cursor: pointer;
+}
+
+.strategy input[type="radio"] {
+  accent-color: var(--acc);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
