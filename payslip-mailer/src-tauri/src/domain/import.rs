@@ -315,12 +315,15 @@ pub enum ConflictStrategy {
 ///
 /// - **空 → `Ok(None)`**：这个人不填这项（不是 0、不是错误）。
 /// - 带千分位逗号 / 货币符号 / 空白 → 去掉后解析。
+/// - **全角数字 → 先归一到半角**（ch.13 必测边界用例「中文全角数字」：
+///   中文输入法打出的「１８５００」必须和「18500」一样被解析）。
 /// - 解析不出来 → `Err`（说清「这一格应该填数字」）。
 pub fn parse_amount(text: &str) -> Result<Option<f64>, String> {
     let raw = text.trim();
     if raw.is_empty() {
         return Ok(None);
     }
+    let raw = crate::util::normalize_fullwidth(raw);
     let cleaned: String = raw
         .chars()
         .filter(|c| {
@@ -784,6 +787,20 @@ mod tests {
         assert_eq!(parse_amount("-2100").unwrap(), Some(-2100.0));
         assert_eq!(parse_amount("18000 元").unwrap(), Some(18000.0));
         assert!(parse_amount("一千八").is_err());
+    }
+
+    /// ch.13 必测边界用例「中文全角数字」：中文输入法打出来的金额
+    /// 必须和半角一样被解析，而不是报「这一格应该填数字」。
+    #[test]
+    fn fullwidth_amounts_parse_like_halfwidth() {
+        assert_eq!(parse_amount("１８５００").unwrap(), Some(18500.0));
+        assert_eq!(parse_amount("１８，０００．５０").unwrap(), Some(18000.5));
+        assert_eq!(parse_amount("－２１００").unwrap(), Some(-2100.0));
+        assert_eq!(parse_amount("＋１８０００").unwrap(), Some(18000.0));
+        assert_eq!(parse_amount("１８０００元").unwrap(), Some(18000.0));
+        assert_eq!(parse_percent("１２．５％").unwrap(), Some(12.5));
+        // 不属于金额的全角字符依旧报错，不悄悄转
+        assert!(parse_amount("（１８０００）").is_err());
     }
 
     /// 标准 9：百分比 0–100。

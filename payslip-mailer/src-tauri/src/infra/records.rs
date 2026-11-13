@@ -291,7 +291,7 @@ pub fn totals(db: &DbState, period_id: i64) -> AppResult<PeriodTotals> {
             let Some(raw) = row.values.get(*key) else {
                 continue; // 这一项没有 → 不参与合计（不是 0，是跳过）
             };
-            let Ok(v) = raw.trim().parse::<f64>() else {
+            let Ok(v) = crate::util::normalize_fullwidth(raw.trim()).parse::<f64>() else {
                 continue; // 坏值在 validate_row 里已经报过，这里不重复拦
             };
             if v >= 0.0 {

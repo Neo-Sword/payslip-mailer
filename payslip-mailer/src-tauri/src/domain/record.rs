@@ -83,7 +83,7 @@ pub fn evaluate_row(
             continue;
         }
         match values.get(&spec.key) {
-            Some(raw) => match raw.trim().parse::<f64>() {
+            Some(raw) => match crate::util::normalize_fullwidth(raw.trim()).parse::<f64>() {
                 Ok(n) => {
                     field_values.insert(spec.key.clone(), n);
                 }
@@ -271,6 +271,22 @@ mod tests {
         let r = evaluate_row(&specs(), &values).expect("求值失败");
         assert_eq!(r.computed.get("net_pay").unwrap(), "19100.00");
         assert_eq!(r.total_earnings, 21200.0);
+        assert_eq!(r.total_deductions, -2100.0);
+    }
+
+    /// ch.13 必测边界用例「中文全角数字」在**求值这条路上**也成立：
+    /// 逐格编辑里用中文输入法打进去的「１８５００」要能算，不能报「不是一个能算的数字」。
+    /// （导入那条路归 `domain::import::parse_amount` 的测试，这里钉住预览/核对/发送
+    /// 共用的 `evaluate_row` —— 它们看的是同一份入库后的字符串。）
+    #[test]
+    fn fullwidth_cell_values_evaluate_like_halfwidth() {
+        let mut values = BTreeMap::new();
+        values.insert("base_salary".to_string(), "１８５００".to_string());
+        values.insert("performance".to_string(), "３２００".to_string());
+        values.insert("social_insurance".to_string(), "－２１００".to_string());
+        let r = evaluate_row(&specs(), &values).expect("全角金额不该报错");
+        assert_eq!(r.computed.get("net_pay").unwrap(), "19600.00");
+        assert_eq!(r.total_earnings, 21700.0);
         assert_eq!(r.total_deductions, -2100.0);
     }
 

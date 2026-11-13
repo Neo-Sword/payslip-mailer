@@ -96,7 +96,7 @@ pub fn evaluate_formula(
 ) -> AppResult<String> {
     let mut field_values = std::collections::BTreeMap::new();
     for (k, v) in values {
-        match v.trim().parse::<f64>() {
+        match crate::util::normalize_fullwidth(v.trim()).parse::<f64>() {
             Ok(n) => {
                 field_values.insert(k, n);
             }

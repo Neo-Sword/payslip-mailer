@@ -36,6 +36,26 @@ pub fn from_hex(text: &str) -> Option<Vec<u8>> {
     Some(out)
 }
 
+/// 全角金额字符 → 半角（ch.13 必测边界用例「中文全角数字」）。
+///
+/// 中文输入法直接打出的数字是「１８５００」这类全角形式，`parse::<f64>` 不认识它们，
+/// 但 HR 的 Excel 与逐格编辑里都会出现 —— 它们不该被当成「填错了」。
+///
+/// 全角 ASCII 区（U+FF01–U+FF5E）与半角正好差 0xFEE0。这里**只转金额里可能出现的
+/// 五类**（数字 / 小数点 / 加号 / 减号 / 百分号），其余字符原样留下 ——
+/// 让它们照旧走到各自的报错，而不是被悄悄转成别的东西（比如把「（」转成「(」）。
+pub fn normalize_fullwidth(text: &str) -> String {
+    text.chars()
+        .map(|c| {
+            if matches!(c, '０'..='９' | '．' | '＋' | '－' | '％') {
+                char::from_u32(c as u32 - 0xFEE0).unwrap_or(c)
+            } else {
+                c
+            }
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -53,5 +73,16 @@ mod tests {
         assert!(from_hex("abc").is_none(), "奇数长度必须拒绝");
         assert!(from_hex("zz").is_none(), "非法字符必须拒绝");
         assert!(from_hex("").unwrap().is_empty());
+    }
+
+    #[test]
+    fn fullwidth_amount_chars_become_halfwidth_and_nothing_else() {
+        assert_eq!(normalize_fullwidth("１８５００"), "18500");
+        assert_eq!(normalize_fullwidth("１８，０００．５０"), "18，000.50");
+        assert_eq!(normalize_fullwidth("－２１００"), "-2100");
+        assert_eq!(normalize_fullwidth("＋１８０００"), "+18000");
+        assert_eq!(normalize_fullwidth("１２．５％"), "12.5%");
+        // 不属于金额的字符原样留下，不悄悄转
+        assert_eq!(normalize_fullwidth("ＡＢ（１）"), "ＡＢ（1）");
     }
 }
